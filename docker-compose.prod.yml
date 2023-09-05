@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWD: ${DB_PASSWD}
+      DB_NAME: geos-ui_prod
+      DB_HOST: db
+      DB_PORT: 5432
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      APP_SECRET: ${BACKEND_APP_SECRET}
+      OAUTH2_REFRESH_TOKEN_GENERATOR: True
+      ENABLE_AUTHENTICATION: True
+  
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: false
+      AUTH_SECRET: ${FRONT_AUTH_SECRET}
+
+  
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: geos-ui_prod
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  migrate:
+    build: ./backend
+    command: ["python", "-m", "alembic",  "upgrade", "head"]
+    depends_on:
+      - db
+    environment:
+      DB_USER: ${DB_USER}
+      DB_PASSWD: ${DB_PASSWD}
+      DB_NAME: geos-ui_prod
+      DB_HOST: db
+      DB_PORT: 5432
+      
+  
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+  #   environment:
+  #     - "discovery.type=single-node"
+
+volumes:
+  postgres_data:
