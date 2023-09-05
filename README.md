@@ -14,3 +14,6 @@ The first time it will take a long time to build the images. Subsequent deployme
 
 ## Accessing the application
 The application will be available at http://localhost.
+
+## Customizing the application
+You can set settings like language or night mode by hovering the upper right area of the screen.
