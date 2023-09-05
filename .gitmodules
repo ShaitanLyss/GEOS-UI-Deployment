@@ -1,0 +1,6 @@
+[submodule "backend"]
+	path = backend
+	url = https://github.com/shaitanlyss/makutu-gui-back.git
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/shaitanlyss/makutu-gui-front.git
