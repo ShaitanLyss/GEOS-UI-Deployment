@@ -21,16 +21,16 @@ services:
       OAUTH2_REFRESH_TOKEN_GENERATOR: True
       ENABLE_AUTHENTICATION: True
   
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "80:80"
-    environment:
-      APP_ENV: prod
-      APP_DEBUG: false
-      AUTH_SECRET: ${FRONT_AUTH_SECRET}
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "80:80"
+  #   environment:
+  #     APP_ENV: prod
+  #     APP_DEBUG: false
+  #     AUTH_SECRET: ${FRONT_AUTH_SECRET}
 
   
   db:
@@ -39,6 +39,7 @@ services:
       POSTGRES_DB: geos-ui_preprod
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWD}
+    
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
