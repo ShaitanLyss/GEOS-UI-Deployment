@@ -19,8 +19,6 @@ services:
       GEOS_UI_DB_USER: ${DB_USER}
       GEOS_UI_DB_PASSWD: ${DB_PASSWD}
       GEOS_UI_DB_NAME: geos-ui-dev
-      GEOS_UI_DB_HOST: postgres
-      GEOS_UI_DB_PORT: 5432
       GEOS_UI_AUTH0_DOMAIN: ${AUTH0_DOMAIN}
       GEOS_UI_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
       GEOS_UI_AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
@@ -28,21 +26,21 @@ services:
       GEOS_UI_OAUTH2_REFRESH_TOKEN_GENERATOR: True
       GEOS_UI_ENABLE_AUTHENTICATION: False
   
-  postgraphile:
-    image: graphile/postgraphile
-    depends_on:
-      - postgres
-    ports:
-      - "5000:5000"
-    command:
-      [
-          "--connection",
-          "postgres://${DB_USER}:${DB_PASSWD}@postgres:5432/geos-ui-dev",
-          "--port",
-          "5000",
-          "--schema",
-          "public",
-      ]
+  # postgraphile:
+  #   image: graphile/postgraphile
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - "5000:5000"
+  #   command:
+  #     [
+  #         "--connection",
+  #         "postgres://${DB_USER}:${DB_PASSWD}@postgres:5432/geos-ui-dev",
+  #         "--port",
+  #         "5000",
+  #         "--schema",
+  #         "public",
+  #     ]
 
   pgadmin:
     image: dpage/pgadmin4
@@ -66,6 +64,15 @@ services:
       # start_period: 5s  
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  test_postgres:
+    image: docker.io/library/postgres:latest
+    environment:
+      POSTGRES_DB: geos-ui-test
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWD}
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
       
   
   # elasticsearch:
@@ -75,3 +82,4 @@ services:
 
 volumes:
   postgres_data:
+  postgres_test_data:
