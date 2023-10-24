@@ -9,11 +9,11 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      -
-        name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          submodules: 'true'
+      # -
+      #   name: Checkout repository
+      #   uses: actions/checkout@v3
+      #   with:
+      #     submodules: 'true'
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -34,4 +34,4 @@ jobs:
           push: true
           tags: moonlyss/geos-ui-backend:latest
           secrets:  |
-            GIT_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+            GIT_AUTH_TOKEN=${{ secrets.ACTION_GITHUB_TOKEN }}
