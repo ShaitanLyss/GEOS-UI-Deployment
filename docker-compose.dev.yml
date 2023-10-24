@@ -4,10 +4,12 @@ services:
   backend:
     depends_on:
       - postgres
-    image: moonlyss/geos-ui-backend
+    image: docker.io/moonlyss/geos-ui-backend:dev
     build:
       context: backend
       target: development
+    security_opt:
+      - seccomp:unconfined
     working_dir: /app
     volumes:
       - ./backend/src:/app

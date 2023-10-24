@@ -1,61 +1,70 @@
 version: '3.8'
-
+name: geos-ui-preprod
 services:
-
   backend:
+    depends_on:
+      - postgres
+    image: docker.io/moonlyss/geos-ui-backend:latest
+    build:
+      context: backend
     security_opt:
       - seccomp:unconfined
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    restart: on-failure
     environment:
-      DB_USER: ${DB_USER}
-      DB_PASSWD: ${DB_PASSWD}
-      DB_NAME: geos-ui_preprod
-      DB_HOST: db
-      DB_PORT: 5432
-      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
-      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
-      AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
-      APP_SECRET: ${BACKEND_APP_SECRET}
-      OAUTH2_REFRESH_TOKEN_GENERATOR: True
-      ENABLE_AUTHENTICATION: True
+      GEOS_UI_DB_USER: ${DB_USER}
+      GEOS_UI_DB_PASSWD: ${DB_PASSWD}
+      GEOS_UI_DB_NAME: geos-ui-preprod
+      GEOS_UI_DB_HOST: postgres
+      GEOS_UI_AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      GEOS_UI_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+      GEOS_UI_AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
+      GEOS_UI_APP_SECRET: ${BACKEND_APP_SECRET}
+      GEOS_UI_OAUTH2_REFRESH_TOKEN_GENERATOR: True
+      GEOS_UI_ENABLE_AUTHENTICATION: False
+    
   
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
+  # postgraphile:
+  #   image: graphile/postgraphile
+  #   depends_on:
+  #     - postgres
   #   ports:
-  #     - "80:80"
-  #   environment:
-  #     APP_ENV: prod
-  #     APP_DEBUG: false
-  #     AUTH_SECRET: ${FRONT_AUTH_SECRET}
+  #     - "5000:5000"
+  #   command:
+  #     [
+  #         "--connection",
+  #         "postgres://${DB_USER}:${DB_PASSWD}@postgres:5432/geos-ui-dev",
+  #         "--port",
+  #         "5000",
+  #         "--schema",
+  #         "public",
+  #     ]
 
+  # pgadmin:
+  #   image: docker.io/dpage/pgadmin4:latest
+  #   ports:
+  #     - "5050:80"
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
   
-  db:
-    image: postgres:latest
+  postgres:
+    image: docker.io/library/postgres:latest
     environment:
-      POSTGRES_DB: geos-ui_preprod
+      POSTGRES_DB: geos-ui-preprod
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWD}
-    
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pg_isready", "-d", "geos-ui-dev"]
+      # interval: 30s
+      # timeout: 60s
+      # retries: 5
+      # start_period: 5s  
+    security_opt:
+      - seccomp:unconfined
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  migrate:
-    build: ./backend
-    command: ["python", "-m", "alembic",  "upgrade", "head"]
-    depends_on:
-      - db
-    environment:
-      DB_USER: ${DB_USER}
-      DB_PASSWD: ${DB_PASSWD}
-      DB_NAME: geos-ui_preprod
-      DB_HOST: db
-      DB_PORT: 5432
       
   
   # elasticsearch:
