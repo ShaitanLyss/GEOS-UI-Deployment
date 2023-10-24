@@ -28,3 +28,5 @@ jobs:
           context: "{{defaultContext}}:backend"
           push: true
           tags: moonlyss/geos-ui-backend:latest
+          secrets:  |
+            GIT_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
