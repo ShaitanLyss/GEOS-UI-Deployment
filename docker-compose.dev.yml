@@ -1,22 +1,85 @@
 version: '3.8'
-
+name: geos-ui-dev
 services:
-
+  backend:
+    depends_on:
+      - postgres
+    image: moonlyss/geos-ui-backend
+    build:
+      context: backend
+      target: development
+    working_dir: /app
+    volumes:
+      - ./backend/src:/app
+    ports:
+      - "8000:8000"
+    restart: on-failure
+    
+    environment:
+      GEOS_UI_DB_USER: ${DB_USER}
+      GEOS_UI_DB_PASSWD: ${DB_PASSWD}
+      GEOS_UI_DB_NAME: geos-ui-dev
+      GEOS_UI_AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      GEOS_UI_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
+      GEOS_UI_AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
+      GEOS_UI_APP_SECRET: ${BACKEND_APP_SECRET}
+      GEOS_UI_OAUTH2_REFRESH_TOKEN_GENERATOR: True
+      GEOS_UI_ENABLE_AUTHENTICATION: False
   
-  # db:
-  #   image: postgres:latest
-  #   environment:
-  #     POSTGRES_DB: geos-ui_prod
-  #     POSTGRES_USER: ${DB_USER}
-  #     POSTGRES_PASSWORD: ${DB_PASSWD}
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
+  # postgraphile:
+  #   image: graphile/postgraphile
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - "5000:5000"
+  #   command:
+  #     [
+  #         "--connection",
+  #         "postgres://${DB_USER}:${DB_PASSWD}@postgres:5432/geos-ui-dev",
+  #         "--port",
+  #         "5000",
+  #         "--schema",
+  #         "public",
+  #     ]
+
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+  
+  postgres:
+    image: docker.io/library/postgres:latest
+    environment:
+      POSTGRES_DB: geos-ui-dev
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWD}
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pg_isready", "-d", "geos-ui-dev"]
+      # interval: 30s
+      # timeout: 60s
+      # retries: 5
+      # start_period: 5s  
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  test_postgres:
+    image: docker.io/library/postgres:latest
+    environment:
+      POSTGRES_DB: geos-ui-test
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWD}
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
       
   
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
-    environment:
-      - "discovery.type=single-node"
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+  #   environment:
+  #     - "discovery.type=single-node"
 
 volumes:
   postgres_data:
+  postgres_test_data:
