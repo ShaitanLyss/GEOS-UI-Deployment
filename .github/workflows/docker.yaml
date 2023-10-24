@@ -25,7 +25,7 @@ jobs:
         name: Build and push Backend Docker image
         uses: docker/build-push-action@v5
         with:
-          context: "."
+          context: "{{defaultContext}}:backend"
           push: true
           tags: moonlyss/geos-ui-backend:latest
           secrets:  |
