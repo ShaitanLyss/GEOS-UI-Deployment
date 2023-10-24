@@ -9,11 +9,6 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      # -
-      #   name: Checkout repository
-      #   uses: actions/checkout@v3
-      #   with:
-      #     submodules: 'true'
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -30,7 +25,7 @@ jobs:
         name: Build and push Backend Docker image
         uses: docker/build-push-action@v5
         with:
-          context: "{{defaultContext}}:backend"
+          context: "."
           push: true
           tags: moonlyss/geos-ui-backend:latest
           secrets:  |
