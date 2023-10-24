@@ -43,7 +43,7 @@ services:
   #     ]
 
   pgadmin:
-    image: dpage/pgadmin4
+    image: docker.io/dpage/pgadmin4:latest
     ports:
       - "5050:80"
     environment:
@@ -71,8 +71,6 @@ services:
       POSTGRES_DB: geos-ui-test
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWD}
-    volumes:
-      - postgres_test_data:/var/lib/postgresql/data
       
   
   # elasticsearch:
@@ -82,4 +80,3 @@ services:
 
 volumes:
   postgres_data:
-  postgres_test_data:
