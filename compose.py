@@ -23,6 +23,7 @@ if not args.command:
     parser.print_help()
     exit(1)
 
+print("# Setting up\n")
 pipe_path = os.path.expanduser("~/geos-ui-compose.pipe")
 container_name = "geos-ui-compose"
 print("Creating pipe...")
@@ -34,7 +35,6 @@ except FileExistsError:
 except OSError as e:
     print("Error creating pipe: {}".format(e))
     
-print("# Setting up")
 print("Pulling latest compose image...")
 subprocess.run(
     [
@@ -98,8 +98,7 @@ with open(pipe_path, "r") as f:
         if line.strip() == "end":
             break
 
-print()
-print("# Cleaning up")
+print("\n# Cleaning up")
 print("Removing compose container...")
 subprocess.run(
     [
@@ -111,4 +110,4 @@ subprocess.run(
 print("Done.")
 print("Removing pipe...")
 os.remove(pipe_path)
-print("Removed pipe.")
+print("Done.")
