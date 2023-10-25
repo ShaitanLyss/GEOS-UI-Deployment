@@ -34,6 +34,7 @@ except FileExistsError:
 except OSError as e:
     print("Error creating pipe: {}".format(e))
     
+print("# Setting up")
 print("Pulling latest compose image...")
 subprocess.run(
     [
@@ -53,6 +54,7 @@ subprocess.run(
 )
 print("Done.")
 
+print("\n# Running compose container\n")
 my_compose = subprocess.Popen(
     [
         "podman",
