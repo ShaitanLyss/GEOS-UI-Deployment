@@ -2,7 +2,6 @@ from abc import ABCMeta, abstractmethod
 import os
 import re
 import subprocess
-from turtle import back
 from typing import Dict, List, Set, Type
 import dotenv
 from pathlib import Path
@@ -13,30 +12,32 @@ import argparse
 
 dotenv.load_dotenv()
 
+pipe_path = os.path.expanduser("~/geos-ui-compose.pipe")
+
 
 class ComposeInterface(metaclass=ABCMeta):
     @abstractmethod
     def create(self, compose: "ComposeInfo"):
         raise NotImplementedError
-    
+
     @abstractmethod
     def start(self, compose: "ComposeInfo"):
         raise NotImplementedError
-    
+
     @abstractmethod
     def exists(self, compose: "ComposeInfo") -> bool:
         raise NotImplementedError
-    
+
     @abstractmethod
     def running(self, compose: "ComposeInfo") -> bool:
         raise NotImplementedError
-    
+
     def up(self, compose: "ComposeInfo"):
         if not self.exists(compose):
             self.create(compose)
         elif not self.running(compose):
             self.start(compose)
-        
+
     @abstractmethod
     def down(self, compose: "ComposeInfo"):
         raise NotImplementedError
@@ -128,6 +129,54 @@ class PodmanStdoutCompose(ComposeInterface):
     def pull(self, compose: "ComposeInfo"):
         for image in compose.images:
             print(*["podman", "pull", image])
+
+    def exists(self, compose: "ComposeInfo") -> bool:
+        return False
+
+    def running(self, compose: "ComposeInfo") -> bool:
+        return False
+
+    def start(self, compose: "ComposeInfo"):
+        return print(*["podman", "pod", "start", compose.name])
+    
+class PodmanPipeCompose(ComposeInterface):
+    def create(self, compose: "ComposeInfo"):
+        with open(pipe_path, "w") as f:
+            f.write(f"podman pod create {' '.join(create_pod_args(compose))}\n")
+            for service_name, service in compose.services.items():
+                if service.image:
+                    f.write(
+                        f"podman run {' '.join(run_service_args(service_name, compose))}\n"
+                    )
+                elif service.build:
+                    f.write(
+                        " ".join(["podman", "run", *run_service_args(service_name, compose)])
+                    )
+                    f.write(
+                        " ".join(["podman", "build", *build_service_args(service_name, compose)])
+                    )
+                else:
+                    raise Exception("Service must have either image or build")
+            
+    
+    def down(self, compose: "ComposeInfo"):
+        with open(pipe_path, "w") as f:
+            f.write(f"podman pod stop {compose.name}\n")
+            
+            
+            
+    def rm(self, compose: "ComposeInfo"):
+        self.down(compose)
+        with open(pipe_path, "w") as f:
+            f.write(f"podman pod rm {compose.name}\n")
+            
+            
+            
+    def pull(self, compose: "ComposeInfo"):
+        with open(pipe_path, "w") as f:
+            for image in compose.images:
+                f.write(f"podman pull {image}\n")
+            
             
     def exists(self, compose: "ComposeInfo") -> bool:
         return False
@@ -136,8 +185,15 @@ class PodmanStdoutCompose(ComposeInterface):
         return False
     
     def start(self, compose: "ComposeInfo"):
-        return print(*["podman", "pod", "start", compose.name])
+        with open(pipe_path, "w") as f:
+            f.write(f"podman pod start {compose.name}\n")
             
+            
+    
+            
+    
+
+
 class PodmanCompose(ComposeInterface):
     def create(self, compose: "ComposeInfo"):
         subprocess.run(["podman", "pod", "create", *create_pod_args(compose)])
@@ -166,12 +222,15 @@ class PodmanCompose(ComposeInterface):
     def pull(self, compose: "ComposeInfo"):
         for image in compose.images:
             subprocess.run(["podman", "pull", image])
-            
+
     def exists(self, compose: "ComposeInfo") -> bool:
         return subprocess.run(["podman", "pod", "exists", compose.name]).returncode == 0
-    
+
     def running(self, compose: "ComposeInfo") -> bool:
         return False
+
+    def start(self, compose: "ComposeInfo"):
+        subprocess.run(["podman", "pod", "start", compose.name])
 
 
 class ServiceBuildInfo(BaseModel):
@@ -226,21 +285,21 @@ def format_env_var(value: str | bool) -> str:
         raise ValueError(f"Unsupported type {type(value)}")
 
 
-
-
-
 def parse_compose_file(file: str | Path) -> ComposeInfo:
     compose_data = load(open(file), Loader=Loader)
     compose_info = ComposeInfo(**compose_data)
     return compose_info
+
 
 backend_map: Dict[str, Type[ComposeInterface]] = {
     "p": PodmanCompose,
     "podman": PodmanCompose,
     "sp": PodmanStdoutCompose,
     "ps": PodmanStdoutCompose,
+    "pp": PodmanPipeCompose,
     "stdoutPodman": PodmanStdoutCompose,
 }
+
 
 def main():
     parser = argparse.ArgumentParser(description="Manage a compose project")
@@ -261,7 +320,7 @@ def main():
     )
 
     subparsers = parser.add_subparsers(required=True, dest="command")
-    
+
     subparsers.add_parser("update", help="Update pod with latest images")
     subparsers.add_parser("create", help="Start pod")
     subparsers.add_parser("up", help="Start pod")
@@ -272,7 +331,7 @@ def main():
     args = parser.parse_args()
 
     compose_info = parse_compose_file(args.file)
-    
+
     compose_backend = backend_map[args.backend]()
 
     match args.command:
@@ -290,6 +349,12 @@ def main():
             compose_backend.rm(compose_info)
         case _:
             print("unknown command")
+            
+    try:
+        with open(pipe_path, "w") as f:
+            f.write("end\n")
+    except FileNotFoundError:
+        pass
 
 
 if __name__ == "__main__":
