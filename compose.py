@@ -73,11 +73,12 @@ my_compose = subprocess.Popen(
     stdout=subprocess.PIPE,
     stderr=subprocess.PIPE,
 )
-stdout, stderr = my_compose.communicate()
-print(stdout.decode())
-print(stderr.decode())
+
 
 with open(pipe_path, "r") as f:
+    stdout, stderr = my_compose.communicate()
+    print(stdout.decode())
+    print(stderr.decode())
     print("Pipe opened")
     while True:
         line = f.readline()
