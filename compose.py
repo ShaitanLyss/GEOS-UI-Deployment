@@ -81,6 +81,7 @@ with open(pipe_path, "r") as f:
     print("Pipe opened")
     while True:
         line = f.readline()
+        print(line)
         if line == "end":
             break
 
