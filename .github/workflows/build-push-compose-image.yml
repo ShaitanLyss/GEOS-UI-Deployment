@@ -1,7 +1,14 @@
-name: ci
+name: build-push-compose-image
 
 on:
   push:
+    paths:
+      - my-podman-compose.py
+      - .github/workflows/build-push-compose-image.yml
+      - docker-compose.*.yml
+      - docker-compose.yml
+      - Dockerfile
+      - my-compose-requirements.txt
     branches:
       - 'main'
 
