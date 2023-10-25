@@ -76,13 +76,17 @@ my_compose = subprocess.Popen(
 
 
 with open(pipe_path, "r") as f:
-    stdout, stderr = my_compose.communicate()
-    print(stdout.decode())
-    print(stderr.decode())
     print("Pipe opened")
     while True:
+        stdout, stderr = my_compose.communicate()
+        if stdout.strip():
+            print(stdout.decode())
+        if stderr.strip():
+            
+            print(stderr.decode())
         line = f.readline()
-        print(line)
+        if line.strip():
+            print(line)
         if line == "end":
             break
 
