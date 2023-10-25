@@ -1,3 +1,4 @@
 python-dotenv==1.*
 pydantic==2.*
 PyYAML==6.*
+ordered_set==4.*

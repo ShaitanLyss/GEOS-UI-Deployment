@@ -9,6 +9,7 @@ from pprint import pprint
 from pydantic import BaseModel, computed_field
 from yaml import load, Loader
 import argparse
+from ordered_set import OrderedSet
 
 dotenv.load_dotenv()
 
@@ -92,7 +93,8 @@ def build_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
 class PodmanStdoutCompose(ComposeInterface):
     def create(self, compose: "ComposeInfo"):
         print(*["podman", "pod", "create", *create_pod_args(compose)])
-        for service_name, service in compose.services.items():
+        for service_name in compose.service_order:
+            service = compose.services[service_name]
             if service.image:
                 print(
                     *[
@@ -143,7 +145,8 @@ class PodmanPipeCompose(ComposeInterface):
     def create(self, compose: "ComposeInfo"):
         with open(pipe_path, "w") as f:
             f.write(f"podman pod create {' '.join(create_pod_args(compose))}\n")
-            for service_name, service in compose.services.items():
+            for service_name in compose.service_order:
+                service = compose.services[service_name]
                 if service.image:
                     f.write(
                         f"podman run {' '.join(run_service_args(service_name, compose))}\n"
@@ -193,7 +196,9 @@ class PodmanPipeCompose(ComposeInterface):
 class PodmanCompose(ComposeInterface):
     def create(self, compose: "ComposeInfo"):
         subprocess.run(["podman", "pod", "create", *create_pod_args(compose)])
-        for service_name, service in compose.services.items():
+        
+        for service_name in compose.service_order:
+            service = compose.services[service_name]
             if service.image:
                 subprocess.run(
                     ["podman", "run", *run_service_args(service_name, compose)]
@@ -269,6 +274,32 @@ class ComposeInfo(BaseModel):
             if service.image:
                 images.add(service.image)
         return images
+    
+    @computed_field
+    @property
+    def service_order(self) -> List[str]:
+        load_order: OrderedSet[str] = OrderedSet() # type: ignore
+        
+        def get_graph() -> dict[str, list[str]]:
+            graph = {}
+            for service_name, service in self.services.items():
+                graph[service_name] = service.depends_on or []
+            return graph
+        
+        def tree_dfs_postfix(tree: dict[str, list[str]], root: str) -> list[str]:
+            res = []
+            for child in tree[root]:
+                if child not in load_order:
+                    res.extend(tree_dfs_postfix(tree, child))
+            res.append(root)
+            load_order.add(root)
+            return res
+        
+        graph = get_graph()
+        
+        for service_name in self.services:
+            tree_dfs_postfix(graph, service_name)
+        return load_order.items
 
 
 format_env_pattern = r"\${(\w+)}"
@@ -321,6 +352,7 @@ def main():
 
     subparsers = parser.add_subparsers(required=True, dest="command")
 
+    subparsers.add_parser("load_order", help="Print service load order")
     subparsers.add_parser("update", help="Update pod with latest images")
     subparsers.add_parser("create", help="Start pod")
     subparsers.add_parser("up", help="Start pod")
@@ -335,6 +367,8 @@ def main():
     compose_backend = backend_map[args.backend]()
 
     match args.command:
+        case "load_order":
+            print(compose_info.service_order)
         case "update":
             compose_backend.update(compose_info)
         case "create":
