@@ -2,13 +2,13 @@ import os
 import subprocess
 import argparse
 
+env = []
 with open(".env", "r") as f:
     for line in f:
         line = line.strip()
         if line:
             if line[0] != "#":
-                key, value = line.split("=")
-                os.environ[key] = value
+                env.append(line)
 
 parser = argparse.ArgumentParser(description="Run geos-ui-compose")
 # parser.add_argument("-u", "--update-image",dest="updt_img", action="store_true", help="Update compose image")
@@ -61,7 +61,8 @@ my_compose = subprocess.Popen(
         "--name",
         container_name,
         "-v",
-        "{}:/tmp/geos-ui-compose.pipe".format(pipe_path),
+        f"{pipe_path}:/tmp/geos-ui-compose.pipe",
+        *[f"-e {e}" for e in env],  # env,
         "docker.io/moonlyss/geos-ui-compose:latest",
         "python",
         "my-podman-compose.py",

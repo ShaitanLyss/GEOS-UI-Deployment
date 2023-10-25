@@ -12,7 +12,7 @@ import argparse
 
 dotenv.load_dotenv()
 
-pipe_path = os.path.expanduser("~/geos-ui-compose.pipe")
+pipe_path = "/tmp/geos-ui-compose.pipe"
 
 
 class ComposeInterface(metaclass=ABCMeta):
