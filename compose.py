@@ -10,7 +10,13 @@ except FileExistsError:
     print("Pipe already exists")
 except OSError as e:
     print("Error creating pipe: {}".format(e))
-
+subprocess.run(
+    [
+        "podman",
+        "pull",
+        "docker.io/moonlyss/geos-ui-compose:latest",
+    ]
+)
 subprocess.run(
     [
         "podman",
