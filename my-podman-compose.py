@@ -319,7 +319,7 @@ class ComposeInfo(BaseModel):
 
 
 format_env_pattern = r"\${(\w+)}"
-service_env_pattern = r"\${SERVICE_(\w+)}"
+service_env_pattern = r"SERVICE_(\w+)"
 
 def format_env_var(value: str | bool, compose: "ComposeInfo") -> str:
     def get_env_var(key: str) -> str: 
