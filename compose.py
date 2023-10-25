@@ -81,9 +81,11 @@ with open(pipe_path, "r") as f:
         try:
             stdout, stderr = my_compose.communicate()
             if stdout.decode.strip():
-                print(stdout.decode())
+                pass
+                # print(stdout.decode())
             if stderr.decode.strip():
-                print(stderr.decode())
+                pass
+                # print(stderr.decode())
         except Exception as e:
             pass
         
