@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 import os
 import re
 import subprocess
-from typing import Dict, List, Set, Type
+from typing import Any, Dict, List, Set, Type
 import dotenv
 from pathlib import Path
 from pprint import pprint
@@ -241,6 +241,10 @@ class ServiceInfo(BaseModel):
     ports: List[str] | None = None
     restart: str | None = None
     security_opt: List[str] | None = None
+    
+    def model_post_init(self, __context: Any) -> None:
+        if self.security_opt:
+            self.security_opt = [opt.replace(":", "=") for opt in self.security_opt]
 
 
 class ComposeInfo(BaseModel):
