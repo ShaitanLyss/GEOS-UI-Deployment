@@ -43,7 +43,7 @@ subprocess.run(
     ]
 )
 print("Done.")
-print("Removing prevvious compose container if exists...")
+print("Removing previous compose container if exists...")
 subprocess.run(
     [
         "podman",
@@ -95,6 +95,8 @@ with open(pipe_path, "r") as f:
         if line.strip() == "end":
             break
 
+print()
+print("# Cleaning up")
 subprocess.run(
     [
         "podman",
@@ -102,7 +104,6 @@ subprocess.run(
         container_name,
     ]
 )
-
-print("Removing pipe...")
+print("Removed compose container.")
 os.remove(pipe_path)
-print("Pipe removed")
+print("Removed pipe.")
