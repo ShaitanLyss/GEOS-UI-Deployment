@@ -16,6 +16,7 @@ subparses = parser.add_subparsers(dest="command")
 subparses.add_parser("up", help="Deploy containers")
 subparses.add_parser("down", help="Remove containers")
 subparses.add_parser("update", help="Update containers")
+subparses.add_parser("rm", help="Remove containers")
 
 args = parser.parse_args()
 
