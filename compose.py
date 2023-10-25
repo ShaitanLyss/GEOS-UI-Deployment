@@ -2,6 +2,7 @@ import os
 import subprocess
 
 pipe_path = os.path.expanduser("~/geos-ui-compose.pipe")
+container_name = "geos-ui-compose"
 print("Creating pipe...")
 try:
     os.mkfifo(pipe_path)
@@ -22,6 +23,8 @@ subprocess.run(
         "podman",
         "run",
         "-d",
+        "--name",
+        container_name,
         "-v",
         "{}:/tmp/geos-ui-compose.pipe".format(pipe_path),
         "docker.io/moonlyss/geos-ui-compose:latest",
@@ -36,6 +39,13 @@ with open("pipe_path", "r") as f:
         if line == "end":
             break
 
+subprocess.run(
+    [
+        "podman",
+        "rm",
+        container_name,
+    ]
+)
 
 print("Removing pipe...")
 os.remove(pipe_path)
