@@ -28,4 +28,6 @@ jobs:
           context: "{{defaultContext}}"
           push: true
           tags: moonlyss/geos-ui-compose:latest
-          module: false
+          secrets: |
+            GIT_AUTH_TOKEN=${{secrets.ACTION_GITHUB_TOKEN}}
+          
