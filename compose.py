@@ -1,5 +1,14 @@
 import os
 import subprocess
+import argparse
+
+parser = argparse.ArgumentParser(description="Run geos-ui-compose")
+subparses = parser.add_subparsers(dest="command", required=True)
+subparses.add_parser("up", help="Deploy containers")
+subparses.add_parser("down", help="Remove containers")
+subparses.add_parser("update", help="Update containers")
+
+args = parser.parse_args()
 
 pipe_path = os.path.expanduser("~/geos-ui-compose.pipe")
 container_name = "geos-ui-compose"
@@ -21,6 +30,14 @@ subprocess.run(
 subprocess.run(
     [
         "podman",
+        "rm",
+        container_name,
+    ]
+)
+
+subprocess.run(
+    [
+        "podman",
         "run",
         "-d",
         "--name",
@@ -28,11 +45,14 @@ subprocess.run(
         "-v",
         "{}:/tmp/geos-ui-compose.pipe".format(pipe_path),
         "docker.io/moonlyss/geos-ui-compose:latest",
+        "python",
+        "my-podman-compose.py",
+        args.command,
     ]
 )
 
 
-with open("pipe_path", "r") as f:
+with open(pipe_path, "r") as f:
     print("Pipe opened")
     while True:
         line = f.readline()
