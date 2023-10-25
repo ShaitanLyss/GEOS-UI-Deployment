@@ -24,6 +24,8 @@ except FileExistsError:
     print("Pipe already exists")
 except OSError as e:
     print("Error creating pipe: {}".format(e))
+    
+print("Pulling latest compose image...")
 subprocess.run(
     [
         "podman",
@@ -31,15 +33,18 @@ subprocess.run(
         "docker.io/moonlyss/geos-ui-compose:latest",
     ]
 )
+print("Done.")
+print("Removing prevvious compose container if exists...")
 subprocess.run(
     [
         "podman",
         "rm",
         container_name,
-    ]
+    ],
 )
+print("Done.")
 
-subprocess.run(
+my_compose = subprocess.Popen(
     [
         "podman",
         "run",
@@ -52,9 +57,13 @@ subprocess.run(
         "python",
         "my-podman-compose.py",
         args.command,
-    ]
+    ],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
 )
-
+stdout, stderr = my_compose.communicate()
+print(stdout.decode())
+print(stderr.decode())
 
 with open(pipe_path, "r") as f:
     print("Pipe opened")
