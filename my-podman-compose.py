@@ -57,8 +57,10 @@ class ComposeInterface(metaclass=ABCMeta):
         """Pulls images used in compose"""
         raise NotImplementedError
 
+
 def container_name(service_name: str, compose: "ComposeInfo") -> str:
     return f"{compose.name}_{service_name}"
+
 
 def create_pod_args(compose: "ComposeInfo") -> List[str]:
     return ["--name", compose.name, "--publish", *compose.ports]
@@ -71,7 +73,16 @@ def run_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
         if service.environment
         else []
     )
-    res = ["-d", "--pod", compose.name, "--name", container_name(service_name, compose), *env_args]
+    res = [
+        "-d",
+        "--pod",
+        compose.name,
+        "--name",
+        container_name(service_name, compose),
+        "--network-alias",
+        service_name,
+        *env_args,
+    ]
 
     if service.security_opt:
         res.extend(["--security-opt", *service.security_opt])
@@ -142,7 +153,8 @@ class PodmanStdoutCompose(ComposeInterface):
 
     def start(self, compose: "ComposeInfo"):
         return print(*["podman", "pod", "start", compose.name])
-    
+
+
 class PodmanPipeCompose(ComposeInterface):
     def create(self, compose: "ComposeInfo"):
         with open(pipe_path, "w") as f:
@@ -155,50 +167,52 @@ class PodmanPipeCompose(ComposeInterface):
                     )
                 elif service.build:
                     f.write(
-                        " ".join(["podman", "run", *run_service_args(service_name, compose)])
+                        " ".join(
+                            ["podman", "run", *run_service_args(service_name, compose)]
+                        )
                     )
                     f.write(
-                        " ".join(["podman", "build", *build_service_args(service_name, compose)])
+                        " ".join(
+                            [
+                                "podman",
+                                "build",
+                                *build_service_args(service_name, compose),
+                            ]
+                        )
                     )
                 else:
                     raise Exception("Service must have either image or build")
-            
-    
+
     def down(self, compose: "ComposeInfo"):
         with open(pipe_path, "w") as f:
             f.write(f"podman pod stop {compose.name}\n")
-            
-            
-            
+
     def rm(self, compose: "ComposeInfo"):
         self.down(compose)
         with open(pipe_path, "w") as f:
             f.write(f"podman pod rm {compose.name}\n")
-            
-            
-            
+
     def pull(self, compose: "ComposeInfo"):
         with open(pipe_path, "w") as f:
             for image in compose.images:
                 f.write(f"podman pull {image}\n")
-            
-            
+
     def exists(self, compose: "ComposeInfo") -> bool:
         return False
-    
+
     def running(self, compose: "ComposeInfo") -> bool:
         return False
-    
+
     def start(self, compose: "ComposeInfo"):
         with open(pipe_path, "w") as f:
             f.write(f"podman pod start {compose.name}\n")
-    
 
 
 class PodmanCompose(ComposeInterface):
     def create(self, compose: "ComposeInfo"):
         subprocess.run(["podman", "pod", "create", *create_pod_args(compose)])
-        
+        subprocess.run(["podman", "volume"])
+
         for service_name in compose.service_order:
             service = compose.services[service_name]
             if service.image:
@@ -248,7 +262,7 @@ class ServiceInfo(BaseModel):
     ports: List[str] | None = None
     restart: str | None = None
     security_opt: List[str] | None = None
-    
+
     def model_post_init(self, __context: Any) -> None:
         if self.security_opt:
             self.security_opt = [opt.replace(":", "=") for opt in self.security_opt]
@@ -276,18 +290,18 @@ class ComposeInfo(BaseModel):
             if service.image:
                 images.add(service.image)
         return images
-    
+
     @computed_field
     @property
     def service_order(self) -> List[str]:
-        load_order: OrderedSet[str] = OrderedSet() # type: ignore
-        
+        load_order: OrderedSet[str] = OrderedSet()  # type: ignore
+
         def get_graph() -> dict[str, list[str]]:
             graph = {}
             for service_name, service in self.services.items():
                 graph[service_name] = service.depends_on or []
             return graph
-        
+
         def tree_dfs_postfix(tree: dict[str, list[str]], root: str) -> list[str]:
             res = []
             for child in tree[root]:
@@ -296,9 +310,9 @@ class ComposeInfo(BaseModel):
             res.append(root)
             load_order.add(root)
             return res
-        
+
         graph = get_graph()
-        
+
         for service_name in self.services:
             tree_dfs_postfix(graph, service_name)
         return load_order.items
@@ -385,7 +399,7 @@ def main():
             compose_backend.rm(compose_info)
         case _:
             print("unknown command")
-            
+
     try:
         with open(pipe_path, "w") as f:
             f.write("end\n")
