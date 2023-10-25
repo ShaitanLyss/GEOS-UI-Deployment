@@ -56,6 +56,8 @@ my_compose = subprocess.Popen(
         "docker.io/moonlyss/geos-ui-compose:latest",
         "python",
         "my-podman-compose.py",
+        "--backend",
+        "pp",
         args.command,
     ],
     stdout=subprocess.PIPE,
