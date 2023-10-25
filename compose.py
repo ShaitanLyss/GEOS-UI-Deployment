@@ -79,7 +79,6 @@ my_compose = subprocess.Popen(
 
 
 with open(pipe_path, "r") as f:
-    print("Pipe opened")
     while True:
         try:
             stdout, stderr = my_compose.communicate()
