@@ -28,3 +28,4 @@ jobs:
           context: "{{defaultContext}}"
           push: true
           tags: moonlyss/geos-ui-compose:latest
+          module: false
