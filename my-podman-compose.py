@@ -187,10 +187,6 @@ class PodmanPipeCompose(ComposeInterface):
     def start(self, compose: "ComposeInfo"):
         with open(pipe_path, "w") as f:
             f.write(f"podman pod start {compose.name}\n")
-            
-            
-    
-            
     
 
 

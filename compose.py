@@ -2,7 +2,16 @@ import os
 import subprocess
 import argparse
 
+with open(".env", "r") as f:
+    for line in f:
+        line = line.strip()
+        if line:
+            if line[0] != "#":
+                key, value = line.split("=")
+                os.environ[key] = value
+
 parser = argparse.ArgumentParser(description="Run geos-ui-compose")
+# parser.add_argument("-u", "--update-image",dest="updt_img", action="store_true", help="Update compose image")
 subparses = parser.add_subparsers(dest="command")
 subparses.add_parser("up", help="Deploy containers")
 subparses.add_parser("down", help="Remove containers")
