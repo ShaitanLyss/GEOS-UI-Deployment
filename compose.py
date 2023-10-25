@@ -49,6 +49,7 @@ subprocess.run(
     [
         "podman",
         "rm",
+        "-i",
         container_name,
     ],
 )
@@ -99,6 +100,7 @@ with open(pipe_path, "r") as f:
 
 print()
 print("# Cleaning up")
+print("Removing compose container...")
 subprocess.run(
     [
         "podman",
@@ -106,6 +108,7 @@ subprocess.run(
         container_name,
     ]
 )
-print("Removed compose container.")
+print("Done.")
+print("Removing pipe...")
 os.remove(pipe_path)
 print("Removed pipe.")
