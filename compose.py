@@ -92,8 +92,7 @@ with open(pipe_path, "r") as f:
         line = f.readline()
         if line.strip():
             print(line)
-            print(line == "end")
-        if line == "end":
+        if line.strip() == "end":
             break
 
 subprocess.run(
