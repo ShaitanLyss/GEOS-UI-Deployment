@@ -17,6 +17,7 @@ subparses.add_parser("up", help="Deploy containers")
 subparses.add_parser("down", help="Remove containers")
 subparses.add_parser("update", help="Update containers")
 subparses.add_parser("rm", help="Remove containers")
+subparses.add_parser("load_order", help="Print service load order")
 
 args = parser.parse_args()
 
@@ -35,7 +36,7 @@ except FileExistsError:
     print("Pipe already exists")
 except OSError as e:
     print("Error creating pipe: {}".format(e))
-    
+
 print("Pulling latest compose image...")
 subprocess.run(
     [
@@ -91,11 +92,11 @@ with open(pipe_path, "r") as f:
                 # print(stderr.decode())
         except Exception as e:
             pass
-        
+
         line = f.readline().strip()
         if line == "end":
             break
-        
+
         if line:
             print(line)
             subprocess.run(line.split(" "))
