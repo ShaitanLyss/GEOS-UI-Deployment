@@ -1,5 +1,5 @@
 FROM python:3.12-alpine AS build
-COPY requirements.txt ./
+COPY my-compose-requirements.txt ./
 RUN pip install --no-cache-dir -r my-compose-requirements.txt
 
 
