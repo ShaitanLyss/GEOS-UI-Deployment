@@ -69,7 +69,7 @@ def create_pod_args(compose: "ComposeInfo") -> List[str]:
 def run_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
     service = compose.services[service_name]
     env_args = (
-        [f"-e {k}={format_env_var(v)}" for k, v in service.environment.items()]
+        [f"-e {k}={format_env_var(v, compose)}" for k, v in service.environment.items()]
         if service.environment
         else []
     )
@@ -319,14 +319,21 @@ class ComposeInfo(BaseModel):
 
 
 format_env_pattern = r"\${(\w+)}"
+service_env_pattern = r"\${SERVICE_(\w+)}"
 
-
-def format_env_var(value: str | bool) -> str:
+def format_env_var(value: str | bool, compose: "ComposeInfo") -> str:
+    def get_env_var(key: str) -> str: 
+        match = re.match(service_env_pattern, key)
+        if match:
+            return container_name(match.group(1), compose)
+        else:
+            return os.environ[key]
+        
     if isinstance(value, bool):
         return "true" if value else "false"
     elif isinstance(value, str):
         return re.sub(
-            format_env_pattern, lambda match: os.environ[match.group(1)], value
+            format_env_pattern, lambda match: get_env_var(match.group(1)), value
         )
     else:
         raise ValueError(f"Unsupported type {type(value)}")
