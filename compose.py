@@ -3,12 +3,16 @@ import subprocess
 import argparse
 
 parser = argparse.ArgumentParser(description="Run geos-ui-compose")
-subparses = parser.add_subparsers(dest="command", required=True)
+subparses = parser.add_subparsers(dest="command")
 subparses.add_parser("up", help="Deploy containers")
 subparses.add_parser("down", help="Remove containers")
 subparses.add_parser("update", help="Update containers")
 
 args = parser.parse_args()
+
+if not args.command:
+    parser.print_help()
+    exit(1)
 
 pipe_path = os.path.expanduser("~/geos-ui-compose.pipe")
 container_name = "geos-ui-compose"
