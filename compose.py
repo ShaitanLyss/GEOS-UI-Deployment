@@ -78,12 +78,15 @@ my_compose = subprocess.Popen(
 with open(pipe_path, "r") as f:
     print("Pipe opened")
     while True:
-        stdout, stderr = my_compose.communicate()
-        if stdout.strip():
-            print(stdout.decode())
-        if stderr.strip():
-            
-            print(stderr.decode())
+        try:
+            stdout, stderr = my_compose.communicate()
+            if stdout.decode.strip():
+                print(stdout.decode())
+            if stderr.decode.strip():
+                print(stderr.decode())
+        except Exception as e:
+            pass
+        
         line = f.readline()
         if line.strip():
             print(line)
