@@ -91,11 +91,13 @@ with open(pipe_path, "r") as f:
         except Exception as e:
             pass
         
-        line = f.readline()
-        if line.strip():
-            print(line)
-        if line.strip() == "end":
+        line = f.readline().strip()
+        if line == "end":
             break
+        
+        if line:
+            print(line)
+            subprocess.run(line)
 
 print("\n# Cleaning up")
 print("Removing compose container...")
