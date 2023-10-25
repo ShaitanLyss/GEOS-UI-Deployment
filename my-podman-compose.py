@@ -315,7 +315,7 @@ def main():
         "--backend",
         dest="backend",
         help="Container backend to use",
-        choices=["ps", "sp", "stdoutPodman", "p", "podman"],
+        choices=backend_map.keys(),
         default="podman",
     )
 
