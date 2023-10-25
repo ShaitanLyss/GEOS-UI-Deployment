@@ -57,6 +57,8 @@ class ComposeInterface(metaclass=ABCMeta):
         """Pulls images used in compose"""
         raise NotImplementedError
 
+def container_name(service_name: str, compose: "ComposeInfo") -> str:
+    return f"{compose.name}_{service_name}"
 
 def create_pod_args(compose: "ComposeInfo") -> List[str]:
     return ["--name", compose.name, "--publish", *compose.ports]
@@ -69,7 +71,7 @@ def run_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
         if service.environment
         else []
     )
-    res = ["-d", "--pod", compose.name, "--name", service_name, *env_args]
+    res = ["-d", "--pod", compose.name, "--name", container_name(service_name, compose), *env_args]
 
     if service.security_opt:
         res.extend(["--security-opt", *service.security_opt])
@@ -85,7 +87,7 @@ def build_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
 
     return [
         "-t",
-        service_name,
+        container_name(service_name, compose),
         service.build.context,
     ]
 
