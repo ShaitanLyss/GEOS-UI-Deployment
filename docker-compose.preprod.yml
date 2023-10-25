@@ -10,7 +10,7 @@ services:
     security_opt:
       - seccomp:unconfined
     ports:
-      - "8000:8000"
+      - "8001:8000"
     restart: on-failure
     environment:
       GEOS_UI_DB_USER: ${DB_USER}

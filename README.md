@@ -4,7 +4,7 @@ This repository manages the deployment of the GEOS UI project.
 
 ## Pre-requisites
 - Docker
-
+pip install docker-compose-parser
 ## Deployment
 1. Clone this repository
 2. Copy the `.env.example` file to `.env` and fill in the values
