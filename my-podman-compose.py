@@ -63,7 +63,7 @@ def container_name(service_name: str, compose: "ComposeInfo") -> str:
 
 
 def create_pod_args(compose: "ComposeInfo") -> List[str]:
-    return ["--name", compose.name, "--publish", *compose.ports]
+    return ["--name", compose.name, *[f"--publish {p}" for p in compose.ports]]
 
 
 def run_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
