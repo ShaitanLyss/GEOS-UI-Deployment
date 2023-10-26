@@ -28,6 +28,19 @@ services:
       GEOS_UI_APP_SECRET: ${BACKEND_APP_SECRET}
       GEOS_UI_OAUTH2_REFRESH_TOKEN_GENERATOR: True
       GEOS_UI_ENABLE_AUTHENTICATION: False
+
+  frontend:
+    image: docker.io/moonlyss/geos-ui-frontend:latest
+    ports:
+      - "7000:80"
+    depends_on:
+      - backend
+        # condition: service_healthy
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: false
+      AUTH_SECRET: ${FRONT_AUTH_SECRET}
+      PUBLIC_BACKEND_ADDRESS: http://${SERVICE_backend}:80
   
   # postgraphile:
   #   image: graphile/postgraphile
