@@ -70,10 +70,14 @@ services:
     image: docker.io/moonlyss/geos-ui-frontend:latest
     ports:
       - "7000:80"
+    depends_on:
+      - backend
+        # condition: service_healthy
     environment:
       APP_ENV: prod
       APP_DEBUG: false
-      AUTH_SECRET: ${FRONT_AUTH_SECRET}    
+      AUTH_SECRET: ${FRONT_AUTH_SECRET}
+      PUBLIC_BACKEND_ADDRESS: http://${SERVICE_backend}:80
   
   # elasticsearch:
   #   image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
