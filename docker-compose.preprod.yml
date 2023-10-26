@@ -65,7 +65,15 @@ services:
       - seccomp:unconfined
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      
+
+  frontend:
+    image: docker.io/moonlyss/geos-ui-frontend:latest
+    ports:
+      - "80:80"
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: false
+      AUTH_SECRET: ${FRONT_AUTH_SECRET}    
   
   # elasticsearch:
   #   image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
