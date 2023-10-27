@@ -51,6 +51,7 @@ services:
       target: dev
     volumes:
       - ./frontend/src:/app/src
+      - ./frontend/schema.graphql:/app/schema.graphql
     depends_on:
       - backend
         # condition: service_healthy
