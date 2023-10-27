@@ -75,7 +75,7 @@ def run_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
         else []
     )
     secrets_mounts = (
-        [f'--mount "type=bind,src={compose.secrets[v].file},dst=/run/secrets/{v}"' for v in service.secrets if v in compose.secrets]
+        [f'--mount "type=bind,src={compose.secrets[v].file},target=/run/secrets/{v}"' for v in service.secrets if v in compose.secrets]
         if service.secrets and compose.secrets
         else []
     )
