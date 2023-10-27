@@ -98,7 +98,9 @@ with open(pipe_path, "r") as f:
         
         if line:
             print(line)
+            print(line.split(" "))
             subprocess.run(line.split(" "))
+            print()
 
 print("\n# Cleaning up")
 print("Removing compose container...")
