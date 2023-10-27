@@ -1,10 +1,15 @@
 version: '3.8'
 name: geos-ui-preprod
+secrets:
+  certificate:
+    file: ${CA}
 services:
   backend:
     depends_on:
       - postgres
     image: docker.io/moonlyss/geos-ui-backend:latest
+    secrets:
+      - certificate
     build:
       context: backend
     security_opt:
@@ -23,6 +28,7 @@ services:
       GEOS_UI_APP_SECRET: ${BACKEND_APP_SECRET}
       GEOS_UI_OAUTH2_REFRESH_TOKEN_GENERATOR: True
       GEOS_UI_ENABLE_AUTHENTICATION: False
+      GEOS_UI_HTTPS_CAFILE: /run/secrets/certificate
     
   
   # postgraphile:
