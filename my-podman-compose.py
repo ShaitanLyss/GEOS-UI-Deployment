@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 import os
 import re
+from pydantic.types import FilePath
 import subprocess
 from typing import Any, Dict, List, Set, Type
 import dotenv
@@ -58,7 +59,7 @@ class ComposeInterface(metaclass=ABCMeta):
         raise NotImplementedError
 
 
-def container_name(service_name: str, compose: "ComposeInfo") -> str:
+def container_name(service_name: str, compose: "BaseComposeInfo") -> str:
     return f"{compose.name}_{service_name}"
 
 
@@ -73,6 +74,12 @@ def run_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
         if service.environment
         else []
     )
+    secrets_mounts = (
+        [f'--volume "{compose.secrets[v].file}:/run/secrets/{v}"' for v in service.secrets if v in compose.secrets]
+        if service.secrets and compose.secrets
+        else []
+    )
+    
     res = [
         "-d",
         "--pod",
@@ -82,6 +89,7 @@ def run_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
         "--network-alias",
         service_name,
         *env_args,
+        *secrets_mounts,
     ]
 
     if service.security_opt:
@@ -261,16 +269,23 @@ class ServiceInfo(BaseModel):
     environment: dict[str, str | bool] | None = None
     ports: List[str] | None = None
     restart: str | None = None
+    secrets: List[str] | None = None
     security_opt: List[str] | None = None
 
     def model_post_init(self, __context: Any) -> None:
         if self.security_opt:
             self.security_opt = [opt.replace(":", "=") for opt in self.security_opt]
+    
 
-
-class ComposeInfo(BaseModel):
+class SecretDefineInfo(BaseModel):
+    file: FilePath
+    
+class BaseComposeInfo(BaseModel):
     name: str
+
+class ComposeInfo(BaseComposeInfo):
     services: dict[str, ServiceInfo]
+    secrets: dict[str, SecretDefineInfo] | None
     volumes: dict[str, str | None]
 
     @computed_field
@@ -321,7 +336,7 @@ class ComposeInfo(BaseModel):
 format_env_pattern = r"\${(\w+)}"
 service_env_pattern = r"SERVICE_(\w+)"
 
-def format_env_var(value: str | bool, compose: "ComposeInfo") -> str:
+def format_env_var(value: str | bool, compose: "BaseComposeInfo") -> str:
     def get_env_var(key: str) -> str: 
         match = re.match(service_env_pattern, key)
         if match:
@@ -340,8 +355,13 @@ def format_env_var(value: str | bool, compose: "ComposeInfo") -> str:
 
 
 def parse_compose_file(file: str | Path) -> ComposeInfo:
-    compose_data = load(open(file), Loader=Loader)
-    compose_info = ComposeInfo(**compose_data)
+    base_compose_data = load(open(file), Loader=Loader)
+    base_compose_info = BaseComposeInfo(**base_compose_data)
+    with open(file) as f:
+        file_data = f.read()
+    formatted = format_env_var(file_data, base_compose_info)
+    file_data = load(formatted, Loader=Loader)
+    compose_info = ComposeInfo(**file_data)
     return compose_info
 
 
@@ -353,6 +373,8 @@ backend_map: Dict[str, Type[ComposeInterface]] = {
     "pp": PodmanPipeCompose,
     "stdoutPodman": PodmanStdoutCompose,
 }
+
+
 
 
 def main():
