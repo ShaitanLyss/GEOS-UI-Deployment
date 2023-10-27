@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from ast import Tuple
 import os
 import re
 from pydantic.types import FilePath
@@ -67,6 +68,9 @@ def create_pod_args(compose: "ComposeInfo") -> List[str]:
     return ["--name", compose.name, *[f"--publish {p}" for p in compose.ports]]
 
 
+def get_volume_name(volume: str, compose: 'BaseComposeInfo') -> str:
+    return f"{compose.name}_{volume}"
+
 def run_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
     service = compose.services[service_name]
     env_args = (
@@ -75,11 +79,20 @@ def run_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
         else []
     )
     secrets_mounts = (
-        [f'--mount type=bind,src={compose.secrets[v].file},target=/run/secrets/{v}' for v in service.secrets if v in compose.secrets]
+        [
+            f"--mount type=bind,src={compose.secrets[v].file},target=/run/secrets/{v}"
+            for v in service.secrets
+            if v in compose.secrets
+        ]
         if service.secrets and compose.secrets
         else []
     )
-    
+
+    volume_mounts = [
+        f"--mount type=volume,src={get_volume_name(vmount.volume, compose)},target={vmount.target}"
+        for vmount in service.volumes_mounts
+    ]
+
     res = [
         "-d",
         "--pod",
@@ -90,6 +103,7 @@ def run_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
         service_name,
         *env_args,
         *secrets_mounts,
+        *volume_mounts,
     ]
 
     if service.security_opt:
@@ -113,6 +127,9 @@ def build_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
 
 class PodmanStdoutCompose(ComposeInterface):
     def create(self, compose: "ComposeInfo"):
+        for volume in compose.volumes:
+            print(*["podman", "volume", "create", get_volume_name(volume, compose)])
+            
         print(*["podman", "pod", "create", *create_pod_args(compose)])
         for service_name in compose.service_order:
             service = compose.services[service_name]
@@ -166,6 +183,8 @@ class PodmanStdoutCompose(ComposeInterface):
 class PodmanPipeCompose(ComposeInterface):
     def create(self, compose: "ComposeInfo"):
         with open(pipe_path, "w") as f:
+            for volume in compose.volumes:
+                f.write(f"podman volume create {get_volume_name(volume, compose)}\n")
             f.write(f"podman pod create {' '.join(create_pod_args(compose))}\n")
             for service_name in compose.service_order:
                 service = compose.services[service_name]
@@ -262,6 +281,11 @@ class ServiceBuildInfo(BaseModel):
     context: str
 
 
+class VolumeMountInfo(BaseModel):
+    volume: str
+    target: str
+
+
 class ServiceInfo(BaseModel):
     image: str | None = None
     build: ServiceBuildInfo | None = None
@@ -269,19 +293,34 @@ class ServiceInfo(BaseModel):
     environment: dict[str, str | bool] | None = None
     ports: List[str] | None = None
     restart: str | None = None
+    volumes: List[str] | None = None
     secrets: List[str] | None = None
     security_opt: List[str] | None = None
+
+    @computed_field
+    @property
+    def volumes_mounts(self) -> List[VolumeMountInfo]:
+        return (
+            [
+                VolumeMountInfo(volume=volume, target=target)
+                for volume, target in map(lambda v: v.split(":"), self.volumes)
+            ]
+            if self.volumes
+            else []
+        )
 
     def model_post_init(self, __context: Any) -> None:
         if self.security_opt:
             self.security_opt = [opt.replace(":", "=") for opt in self.security_opt]
-    
+
 
 class SecretDefineInfo(BaseModel):
     file: Path
-    
+
+
 class BaseComposeInfo(BaseModel):
     name: str
+
 
 class ComposeInfo(BaseComposeInfo):
     services: dict[str, ServiceInfo]
@@ -336,14 +375,15 @@ class ComposeInfo(BaseComposeInfo):
 format_env_pattern = r"\${(\w+)}"
 service_env_pattern = r"SERVICE_(\w+)"
 
+
 def format_env_var(value: str | bool, compose: "BaseComposeInfo") -> str:
-    def get_env_var(key: str) -> str: 
+    def get_env_var(key: str) -> str:
         match = re.match(service_env_pattern, key)
         if match:
             return container_name(match.group(1), compose)
         else:
             return os.environ[key]
-        
+
     if isinstance(value, bool):
         return "true" if value else "false"
     elif isinstance(value, str):
@@ -373,8 +413,6 @@ backend_map: Dict[str, Type[ComposeInterface]] = {
     "pp": PodmanPipeCompose,
     "stdoutPodman": PodmanStdoutCompose,
 }
-
-
 
 
 def main():
