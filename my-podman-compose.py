@@ -278,7 +278,7 @@ class ServiceInfo(BaseModel):
     
 
 class SecretDefineInfo(BaseModel):
-    file: FilePath
+    file: Path
     
 class BaseComposeInfo(BaseModel):
     name: str
