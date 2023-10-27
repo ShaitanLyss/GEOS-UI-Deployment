@@ -1,13 +1,20 @@
 version: '3.8'
 name: geos-ui-dev
+secrets:
+  certificate:
+    file: ${CA}
 services:
   backend:
     depends_on:
       - postgres
       - test_postgres
     image: docker.io/moonlyss/geos-ui-backend:dev
+    secrets:
+      - certificate
     build:
       context: backend
+      secrets:
+        - certificate
       target: development
     security_opt:
       - seccomp:unconfined
@@ -30,9 +37,18 @@ services:
       GEOS_UI_ENABLE_AUTHENTICATION: False
 
   frontend:
-    image: docker.io/moonlyss/geos-ui-frontend:latest
     ports:
-      - "7000:80"
+      - "7000:5173"
+    working_dir: /app
+    secrets:
+      - certificate
+    build:
+      secrets:
+        - certificate
+      context: frontend
+      target: dev
+    volumes:
+      - ./frontend/src:/app/src
     depends_on:
       - backend
         # condition: service_healthy
@@ -40,7 +56,7 @@ services:
       APP_ENV: prod
       APP_DEBUG: false
       AUTH_SECRET: ${FRONT_AUTH_SECRET}
-      PUBLIC_BACKEND_ADDRESS: http://${SERVICE_backend}:80
+      PUBLIC_BACKEND_ADDRESS: ${PUBLIC_BACKEND_ADDRESS}
   
   # postgraphile:
   #   image: graphile/postgraphile
