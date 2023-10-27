@@ -77,7 +77,7 @@ services:
       APP_ENV: prod
       APP_DEBUG: false
       AUTH_SECRET: ${FRONT_AUTH_SECRET}
-      PUBLIC_BACKEND_ADDRESS: http://${SERVICE_backend}:80
+      PUBLIC_BACKEND_ADDRESS: ${PUBLIC_BACKEND_ADDRESS}
   
   # elasticsearch:
   #   image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
