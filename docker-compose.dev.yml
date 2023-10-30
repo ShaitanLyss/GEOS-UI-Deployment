@@ -110,6 +110,7 @@ services:
       POSTGRES_DB: geos-ui-test
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWD}
+      PG_PORT: 5433
       
   
   # elasticsearch:
