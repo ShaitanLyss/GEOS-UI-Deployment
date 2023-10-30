@@ -414,35 +414,35 @@ backend_map: Dict[str, Type[ComposeInterface]] = {
     "stdoutPodman": PodmanStdoutCompose,
 }
 
+parser = argparse.ArgumentParser(description="Manage a compose project")
+parser.add_argument(
+    "-f",
+    "--file",
+    dest="file",
+    help="Specify an alternate compose file (default: docker-compose.yml)",
+    default="docker-compose.preprod.yml",
+)
+parser.add_argument(
+    "-b",
+    "--backend",
+    dest="backend",
+    help="Container backend to use",
+    choices=backend_map.keys(),
+    default="podman",
+)
+
+subparsers = parser.add_subparsers(required=True, dest="command")
+
+subparsers.add_parser("load_order", help="Print service load order")
+subparsers.add_parser("update", help="Update pod with latest images")
+subparsers.add_parser("create", help="Start pod")
+subparsers.add_parser("up", help="Start pod")
+subparsers.add_parser("is-up", help="Check if pod is up")
+subparsers.add_parser("down", help="Stop pod")
+subparsers.add_parser("rm", help="Remove pod")
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Manage a compose project")
-    parser.add_argument(
-        "-f",
-        "--file",
-        dest="file",
-        help="Specify an alternate compose file (default: docker-compose.yml)",
-        default="docker-compose.preprod.yml",
-    )
-    parser.add_argument(
-        "-b",
-        "--backend",
-        dest="backend",
-        help="Container backend to use",
-        choices=backend_map.keys(),
-        default="podman",
-    )
-
-    subparsers = parser.add_subparsers(required=True, dest="command")
-
-    subparsers.add_parser("load_order", help="Print service load order")
-    subparsers.add_parser("update", help="Update pod with latest images")
-    subparsers.add_parser("create", help="Start pod")
-    subparsers.add_parser("up", help="Start pod")
-    subparsers.add_parser("is-up", help="Check if pod is up")
-    subparsers.add_parser("down", help="Stop pod")
-    subparsers.add_parser("rm", help="Remove pod")
-
     args = parser.parse_args()
 
     compose_info = parse_compose_file(args.file)
