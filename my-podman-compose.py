@@ -69,7 +69,7 @@ def create_pod_args(compose: "ComposeInfo") -> List[str]:
 
 
 def get_volume_name(volume: str, compose: 'BaseComposeInfo') -> str:
-    return f"{compose.name}_{volume}"
+    return f"{compose.name}_{volume}" if volume in compose.volumes else volume
 
 def run_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
     service = compose.services[service_name]
@@ -320,12 +320,13 @@ class SecretDefineInfo(BaseModel):
 
 class BaseComposeInfo(BaseModel):
     name: str
+    volumes: dict[str, str | None]
 
 
 class ComposeInfo(BaseComposeInfo):
     services: dict[str, ServiceInfo]
     secrets: dict[str, SecretDefineInfo] | None
-    volumes: dict[str, str | None]
+    
 
     @computed_field
     @property
@@ -372,23 +373,23 @@ class ComposeInfo(BaseComposeInfo):
         return load_order.items
 
 
-format_env_pattern = r"\${(\w+)}"
+format_env_pattern = r"\${(\w+)(?::-(.*?))?}"
 service_env_pattern = r"SERVICE_(\w+)"
 
 
 def format_env_var(value: str | bool, compose: "BaseComposeInfo") -> str:
-    def get_env_var(key: str) -> str:
+    def get_env_var(key: str, default: str) -> str:
         match = re.match(service_env_pattern, key)
         if match:
             return container_name(match.group(1), compose)
         else:
-            return os.environ[key]
+            return os.environ[key] if key in os.environ else default
 
     if isinstance(value, bool):
         return "true" if value else "false"
     elif isinstance(value, str):
         return re.sub(
-            format_env_pattern, lambda match: get_env_var(match.group(1)), value
+            format_env_pattern, lambda match: get_env_var(match.group(1), match.group(2)), value
         )
     else:
         raise ValueError(f"Unsupported type {type(value)}")
@@ -400,6 +401,7 @@ def parse_compose_file(file: str | Path) -> ComposeInfo:
     with open(file) as f:
         file_data = f.read()
     formatted = format_env_var(file_data, base_compose_info)
+    print(formatted)
     file_data = load(formatted, Loader=Loader)
     compose_info = ComposeInfo(**file_data)
     return compose_info
