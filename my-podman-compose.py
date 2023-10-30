@@ -377,7 +377,7 @@ format_env_pattern = r"\${(\w+)(?::-(.*?))?}"
 service_env_pattern = r"SERVICE_(\w+)"
 
 
-def format_env_var(value: str | bool, compose: "BaseComposeInfo") -> str:
+def format_env_var(value: Any, compose: "BaseComposeInfo") -> str:
     def get_env_var(key: str, default: str) -> str:
         match = re.match(service_env_pattern, key)
         if match:
@@ -392,7 +392,7 @@ def format_env_var(value: str | bool, compose: "BaseComposeInfo") -> str:
             format_env_pattern, lambda match: get_env_var(match.group(1), match.group(2)), value
         )
     else:
-        raise ValueError(f"Unsupported type {type(value)}")
+        return value
 
 
 def parse_compose_file(file: str | Path) -> ComposeInfo:
