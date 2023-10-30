@@ -290,7 +290,7 @@ class ServiceInfo(BaseModel):
     image: str | None = None
     build: ServiceBuildInfo | None = None
     depends_on: List[str] | None = None
-    environment: dict[str, str | bool] | None = None
+    environment: dict[str, Any] | None = None
     ports: List[str] | None = None
     restart: str | None = None
     volumes: List[str] | None = None
