@@ -50,7 +50,7 @@ subprocess.run(
 print("Done.")
 
 print("\n# Running compose container\n")
-print(*sys.argv[1:])
+# print(*sys.argv[1:])
 my_compose = subprocess.Popen(
     [
         "podman",
