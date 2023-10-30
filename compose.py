@@ -1,6 +1,6 @@
 import os
 import subprocess
-import argparse
+import sys
 
 env = []
 with open(".env", "r") as f:
@@ -10,19 +10,12 @@ with open(".env", "r") as f:
             if line[0] != "#":
                 env.append(line)
 
-parser = argparse.ArgumentParser(description="Run geos-ui-compose")
-# parser.add_argument("-u", "--update-image",dest="updt_img", action="store_true", help="Update compose image")
-subparses = parser.add_subparsers(dest="command")
-subparses.add_parser("up", help="Deploy containers")
-subparses.add_parser("down", help="Remove containers")
-subparses.add_parser("update", help="Update containers")
-subparses.add_parser("rm", help="Remove containers")
 
-args = parser.parse_args()
+# args = parser.parse_args()
 
-if not args.command:
-    parser.print_help()
-    exit(1)
+# if not args.command:
+#     parser.print_help()
+#     exit(1)
 
 print("# Setting up\n")
 pipe_path = os.path.expanduser("~/geos-ui-compose.pipe")
@@ -57,6 +50,7 @@ subprocess.run(
 print("Done.")
 
 print("\n# Running compose container\n")
+print(*sys.argv[1:])
 my_compose = subprocess.Popen(
     [
         "podman",
@@ -70,9 +64,8 @@ my_compose = subprocess.Popen(
         "docker.io/moonlyss/geos-ui-compose:latest",
         "python",
         "my-podman-compose.py",
-        "--backend",
-        "pp",
-        args.command,
+        *(["--backend", "pp"] if "--backend" not in sys.argv else []),
+        *sys.argv[1:],
     ],
     stdout=subprocess.PIPE,
     stderr=subprocess.PIPE,
