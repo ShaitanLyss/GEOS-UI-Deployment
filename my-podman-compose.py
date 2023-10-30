@@ -69,7 +69,7 @@ def create_pod_args(compose: "ComposeInfo") -> List[str]:
 
 
 def get_volume_name(volume: str, compose: 'BaseComposeInfo') -> str:
-    return f"{compose.name}_{volume}"
+    return f"{compose.name}_{volume}" if volume in compose.volumes else volume
 
 def run_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
     service = compose.services[service_name]
