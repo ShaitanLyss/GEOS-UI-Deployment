@@ -22,7 +22,7 @@ services:
     volumes:
       - ./backend/src:/app
     ports:
-      - "8001:8000"
+      - "8000:8000"
     restart: on-failure
     
     environment:
@@ -61,7 +61,7 @@ services:
       APP_ENV: dev
       APP_DEBUG: true
       AUTH_SECRET: ${FRONT_AUTH_SECRET:-CHANGE_FRONTEND_SECRET}
-      PUBLIC_BACKEND_ADDRESS: ${PUBLIC_BACKEND_ADDRESS:-http://127.0.0.1:8000}
+      PUBLIC_BACKEND_ADDRESS: http://backend:8000
 
   
   # postgraphile:
