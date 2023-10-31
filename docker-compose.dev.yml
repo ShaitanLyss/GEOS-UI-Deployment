@@ -2,13 +2,13 @@ version: '3.8'
 name: geos-ui-dev
 secrets:
   certificate:
-    file: ${CA}
+    file: ${CA:-ca-bundle.crt}
 services:
   backend:
     depends_on:
       - postgres
       - test_postgres
-    image: docker.io/moonlyss/geos-ui-backend:dev
+    image: docker.io/moonlyss/geos-ui-backend
     secrets:
       - certificate
     build:
@@ -27,13 +27,14 @@ services:
     
     environment:
       CURL_CA_BUNDLE: /run/secrets/certificate
-      GEOS_UI_DB_USER: ${DB_USER}
+      GEOS_UI_DB_USER: ${DB_USER:-postgres}
       GEOS_UI_DB_PASSWD: ${DB_PASSWD}
       GEOS_UI_DB_NAME: geos-ui-dev
+      GEOS_UI_TEST_DB_PORT: 5433
       GEOS_UI_AUTH0_DOMAIN: ${AUTH0_DOMAIN}
       GEOS_UI_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
       GEOS_UI_AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
-      GEOS_UI_APP_SECRET: ${BACKEND_APP_SECRET}
+      GEOS_UI_APP_SECRET: ${BACKEND_APP_SECRET:-CHANGE_BACKEND_SECRET}
       GEOS_UI_OAUTH2_REFRESH_TOKEN_GENERATOR: True
       GEOS_UI_ENABLE_AUTHENTICATION: False
       GEOS_UI_HTTPS_CAFILE: /run/secrets/certificate
@@ -44,6 +45,7 @@ services:
     working_dir: /app
     secrets:
       - certificate
+    image: docker.io/moonlyss/geos-ui-frontend:latest
     build:
       secrets:
         - certificate
@@ -58,8 +60,8 @@ services:
     environment:
       APP_ENV: dev
       APP_DEBUG: true
-      AUTH_SECRET: ${FRONT_AUTH_SECRET}
-      PUBLIC_BACKEND_ADDRESS: ${PUBLIC_BACKEND_ADDRESS}
+      AUTH_SECRET: ${FRONT_AUTH_SECRET:-CHANGE_FRONTEND_SECRET}
+      PUBLIC_BACKEND_ADDRESS: http://backend:8000
 
   
   # postgraphile:
@@ -78,20 +80,20 @@ services:
   #         "public",
   #     ]
 
-  pgadmin:
-    image: docker.io/dpage/pgadmin4:latest
-    ports:
-      - "5050:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    depends_on:
-      - postgres
+  # pgadmin:
+  #   image: docker.io/dpage/pgadmin4:latest
+  #   ports:
+  #     - "5050:80"
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-fake.email@localhost}
+  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+  #   depends_on:
+  #     - postgres
   postgres:
     image: docker.io/library/postgres:latest
     environment:
       POSTGRES_DB: geos-ui-dev
-      POSTGRES_USER: ${DB_USER}
+      POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWD}
     # healthcheck:
     #   test: ["CMD-SHELL", "pg_isready", "-d", "geos-ui-dev"]
@@ -101,13 +103,13 @@ services:
       # start_period: 5s  
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
   test_postgres:
     image: docker.io/library/postgres:latest
     environment:
       POSTGRES_DB: geos-ui-test
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWD}
+      POSTGRES_PORT: 5433
       
   
   # elasticsearch:

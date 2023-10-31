@@ -69,7 +69,7 @@ def create_pod_args(compose: "ComposeInfo") -> List[str]:
 
 
 def get_volume_name(volume: str, compose: 'BaseComposeInfo') -> str:
-    return f"{compose.name}_{volume}"
+    return f"{compose.name}_{volume}" if volume in compose.volumes else volume
 
 def run_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
     service = compose.services[service_name]
@@ -89,7 +89,7 @@ def run_service_args(service_name: str, compose: "ComposeInfo") -> List[str]:
     )
 
     volume_mounts = [
-        f"--mount type=volume,src={get_volume_name(vmount.volume, compose)},target={vmount.target}"
+        f"--mount type={'volume' if vmount.volume in compose.volumes else 'bind'},src={get_volume_name(vmount.volume, compose)},target={vmount.target}"
         for vmount in service.volumes_mounts
     ]
 
@@ -290,7 +290,7 @@ class ServiceInfo(BaseModel):
     image: str | None = None
     build: ServiceBuildInfo | None = None
     depends_on: List[str] | None = None
-    environment: dict[str, str | bool] | None = None
+    environment: dict[str, Any] | None = None
     ports: List[str] | None = None
     restart: str | None = None
     volumes: List[str] | None = None
@@ -320,12 +320,13 @@ class SecretDefineInfo(BaseModel):
 
 class BaseComposeInfo(BaseModel):
     name: str
+    volumes: dict[str, str | None]
 
 
 class ComposeInfo(BaseComposeInfo):
     services: dict[str, ServiceInfo]
     secrets: dict[str, SecretDefineInfo] | None
-    volumes: dict[str, str | None]
+    
 
     @computed_field
     @property
@@ -372,26 +373,26 @@ class ComposeInfo(BaseComposeInfo):
         return load_order.items
 
 
-format_env_pattern = r"\${(\w+)}"
+format_env_pattern = r"\${(\w+)(?::-(.*?))?}"
 service_env_pattern = r"SERVICE_(\w+)"
 
 
-def format_env_var(value: str | bool, compose: "BaseComposeInfo") -> str:
-    def get_env_var(key: str) -> str:
+def format_env_var(value: Any, compose: "BaseComposeInfo") -> str:
+    def get_env_var(key: str, default: str) -> str:
         match = re.match(service_env_pattern, key)
         if match:
             return container_name(match.group(1), compose)
         else:
-            return os.environ[key]
+            return os.environ[key] if key in os.environ else default
 
     if isinstance(value, bool):
         return "true" if value else "false"
     elif isinstance(value, str):
         return re.sub(
-            format_env_pattern, lambda match: get_env_var(match.group(1)), value
+            format_env_pattern, lambda match: get_env_var(match.group(1), match.group(2)), value
         )
     else:
-        raise ValueError(f"Unsupported type {type(value)}")
+        return value
 
 
 def parse_compose_file(file: str | Path) -> ComposeInfo:
@@ -400,6 +401,7 @@ def parse_compose_file(file: str | Path) -> ComposeInfo:
     with open(file) as f:
         file_data = f.read()
     formatted = format_env_var(file_data, base_compose_info)
+    print(formatted)
     file_data = load(formatted, Loader=Loader)
     compose_info = ComposeInfo(**file_data)
     return compose_info
@@ -414,35 +416,35 @@ backend_map: Dict[str, Type[ComposeInterface]] = {
     "stdoutPodman": PodmanStdoutCompose,
 }
 
+parser = argparse.ArgumentParser(description="Manage a compose project")
+parser.add_argument(
+    "-f",
+    "--file",
+    dest="file",
+    help="Specify an alternate compose file (default: docker-compose.yml)",
+    default="docker-compose.preprod.yml",
+)
+parser.add_argument(
+    "-b",
+    "--backend",
+    dest="backend",
+    help="Container backend to use",
+    choices=backend_map.keys(),
+    default="podman",
+)
+
+subparsers = parser.add_subparsers(required=True, dest="command")
+
+subparsers.add_parser("load_order", help="Print service load order")
+subparsers.add_parser("update", help="Update pod with latest images")
+subparsers.add_parser("create", help="Start pod")
+subparsers.add_parser("up", help="Start pod")
+subparsers.add_parser("is-up", help="Check if pod is up")
+subparsers.add_parser("down", help="Stop pod")
+subparsers.add_parser("rm", help="Remove pod")
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Manage a compose project")
-    parser.add_argument(
-        "-f",
-        "--file",
-        dest="file",
-        help="Specify an alternate compose file (default: docker-compose.yml)",
-        default="docker-compose.preprod.yml",
-    )
-    parser.add_argument(
-        "-b",
-        "--backend",
-        dest="backend",
-        help="Container backend to use",
-        choices=backend_map.keys(),
-        default="podman",
-    )
-
-    subparsers = parser.add_subparsers(required=True, dest="command")
-
-    subparsers.add_parser("load_order", help="Print service load order")
-    subparsers.add_parser("update", help="Update pod with latest images")
-    subparsers.add_parser("create", help="Start pod")
-    subparsers.add_parser("up", help="Start pod")
-    subparsers.add_parser("is-up", help="Check if pod is up")
-    subparsers.add_parser("down", help="Stop pod")
-    subparsers.add_parser("rm", help="Remove pod")
-
     args = parser.parse_args()
 
     compose_info = parse_compose_file(args.file)
