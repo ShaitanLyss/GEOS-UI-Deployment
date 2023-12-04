@@ -51,17 +51,24 @@ services:
         - certificate
       context: frontend
       target: dev
+    command: ["yarn", "dev", "--host"]
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/schema.graphql:/app/schema.graphql
+      - ./frontend/.svelte-kit:/app/.svelte-kit
+      - ./frontend/$houdini:/app/$houdini
+      - ./frontend/vitest.config.ts:/app/vitest.config.ts
+      - ./frontend/vite.config.ts:/app/vite.config.ts
     depends_on:
       - backend
         # condition: service_healthy
     environment:
       APP_ENV: dev
       APP_DEBUG: true
+      ENABLE_AUTH: false
+      PUBLIC_ENABLE_AUTH: false
       AUTH_SECRET: ${FRONT_AUTH_SECRET:-CHANGE_FRONTEND_SECRET}
-      PUBLIC_BACKEND_ADDRESS: http://backend:8000
+      PUBLIC_BACKEND_ADDRESS: http://localhost:8000
 
   
   # postgraphile:

@@ -1,0 +1,96 @@
+version: '3.8'
+name: geos-ui-dev
+secrets:
+  certificate:
+    file: ${CA:-ca-bundle.crt}
+services:
+  backend:
+    extends:
+      file: docker-compose.dev.yml
+      service: backend
+
+  frontend:
+    ports:
+      - "5173:5173"
+    working_dir: /app
+    secrets:
+      - certificate
+    image: docker.io/moonlyss/geos-ui-frontend:latest
+    build:
+      secrets:
+        - certificate
+      context: frontend
+      target: dev
+    command: ["yarn", "dev", "--host"]
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/schema.graphql:/app/schema.graphql
+      - ./frontend/.svelte-kit:/app/.svelte-kit
+      - ./frontend/$houdini:/app/$houdini
+    depends_on:
+      - backend
+        # condition: service_healthy
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: true
+      ENABLE_AUTH: false
+      PUBLIC_ENABLE_AUTH: false
+      AUTH_SECRET: ${FRONT_AUTH_SECRET:-CHANGE_FRONTEND_SECRET}
+      PUBLIC_BACKEND_ADDRESS: http://localhost:8000
+
+  
+  # postgraphile:
+  #   image: graphile/postgraphile
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - "5000:5000"
+  #   command:
+  #     [
+  #         "--connection",
+  #         "postgres://${DB_USER}:${DB_PASSWD}@postgres:5432/geos-ui-dev",
+  #         "--port",
+  #         "5000",
+  #         "--schema",
+  #         "public",
+  #     ]
+
+  # pgadmin:
+  #   image: docker.io/dpage/pgadmin4:latest
+  #   ports:
+  #     - "5050:80"
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-fake.email@localhost}
+  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+  #   depends_on:
+  #     - postgres
+  postgres:
+    image: docker.io/library/postgres:latest
+    environment:
+      POSTGRES_DB: geos-ui-dev
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWD}
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pg_isready", "-d", "geos-ui-dev"]
+      # interval: 30s
+      # timeout: 60s
+      # retries: 5
+      # start_period: 5s  
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  test_postgres:
+    image: docker.io/library/postgres:latest
+    environment:
+      POSTGRES_DB: geos-ui-test
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWD}
+      POSTGRES_PORT: 5433
+      
+  
+  # elasticsearch:
+  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+  #   environment:
+  #     - "discovery.type=single-node"
+
+volumes:
+  postgres_data:

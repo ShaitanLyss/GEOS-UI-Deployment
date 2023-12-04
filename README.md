@@ -15,9 +15,20 @@ The first time it will take a long time to build the images. Subsequent deployme
 
 
 ## Development
+- To run in development mode, run
+    <!-- - `docker compose -f ./docker-compose.dev.yml pull`
+    - `docker compose -f ./docker-compose.dev.yml up` -->
+    <!-- or for a full rebuild run -->
+    - `podman-compose -f ./docker-compose.dev.yml up --build`
 - Autogenerate migrations 
     - `docker exec geos-ui-dev-backend-1 alembic revision --autogenerate -m "Migration message"`
     - The generated migration is a helper, it's important to review it and make sure it's correct
+    
+## Testing
+### Frontend
+- Realtime tests
+    - `podman exec geos-ui-dev_frontend_1 yarn vitest`
+
 
 ## Accessing the application
 The application will be available at http://localhost.
