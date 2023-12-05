@@ -69,7 +69,6 @@ services:
       PUBLIC_ENABLE_AUTH: false
       AUTH_SECRET: ${FRONT_AUTH_SECRET:-CHANGE_FRONTEND_SECRET}
       PUBLIC_BACKEND_ADDRESS: http://localhost:8000
-      PUBLIC_ENABLE_AUTH: false
 
   
   postgraphile:

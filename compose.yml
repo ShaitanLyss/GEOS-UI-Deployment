@@ -1,5 +1,5 @@
 version: '3.8'
-name: geos-ui-preprod
+name: geos-ui
 secrets:
   certificate:
     file: ${CA}
@@ -20,7 +20,7 @@ services:
     environment:
       GEOS_UI_DB_USER: ${DB_USER}
       GEOS_UI_DB_PASSWD: ${DB_PASSWD}
-      GEOS_UI_DB_NAME: geos-ui-preprod
+      GEOS_UI_DB_NAME: geos-ui
       GEOS_UI_DB_HOST: ${SERVICE_postgres}
       GEOS_UI_AUTH0_DOMAIN: ${AUTH0_DOMAIN}
       GEOS_UI_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
@@ -58,7 +58,7 @@ services:
   postgres:
     image: docker.io/library/postgres:latest
     environment:
-      POSTGRES_DB: geos-ui-preprod
+      POSTGRES_DB: geos-ui
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWD}
     # healthcheck:
@@ -67,8 +67,8 @@ services:
       # timeout: 60s
       # retries: 5
       # start_period: 5s  
-    security_opt:
-      - seccomp:unconfined
+    # security_opt:
+    #   - seccomp:unconfined
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
