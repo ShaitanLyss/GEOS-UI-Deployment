@@ -421,8 +421,8 @@ parser.add_argument(
     "-f",
     "--file",
     dest="file",
-    help="Specify an alternate compose file (default: docker-compose.yml)",
-    default="docker-compose.preprod.yml",
+    help="Specify an alternate compose file (default: compose.yml)",
+    default="compose.yml",
 )
 parser.add_argument(
     "-b",
