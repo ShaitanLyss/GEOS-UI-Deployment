@@ -51,14 +51,10 @@ services:
         - certificate
       context: frontend
       target: dev
-    command: ["yarn", "dev", "--host"]
+    command: ["pnpm", "dev", "--host"]
     volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/schema.graphql:/app/schema.graphql
-      - ./frontend/.svelte-kit:/app/.svelte-kit
-      - ./frontend/$houdini:/app/$houdini
-      - ./frontend/vitest.config.ts:/app/vitest.config.ts
-      - ./frontend/vite.config.ts:/app/vite.config.ts
+      - ./frontend/:/app/
+      - /app/node_modules
     depends_on:
       - backend
         # condition: service_healthy
