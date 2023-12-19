@@ -56,7 +56,7 @@ services:
   #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
   
   postgres:
-    image: docker.io/library/postgres:15
+    image: docker.io/library/postgres:latest
     environment:
       POSTGRES_DB: geos-ui
       POSTGRES_USER: ${DB_USER}
