@@ -40,3 +40,7 @@ def main():
         print("Showing geos-ui-compose logs...")
         compose("logs -f")
         print("Done.")
+
+
+if __name__ == '__main__':
+    main()
