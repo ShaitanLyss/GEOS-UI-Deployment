@@ -4,6 +4,22 @@ secrets:
   certificate:
     file: ${CA}
 services:
+  frontend:
+    image: docker.io/moonlyss/geos-ui-frontend:latest
+    build:
+      context: frontend
+    ports:
+      - "7000:3000"
+    depends_on:
+      - backend
+        # condition: service_healthy
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: false
+      AUTH_SECRET: ${FRONT_AUTH_SECRET}
+      BACKEND_ADDRESS: http://backend:8000
+      PUBLIC_BACKEND_ADDRESS: ${PUBLIC_BACKEND_ADDRESS}
+
   backend:
     depends_on:
       - postgres
@@ -72,18 +88,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  frontend:
-    image: docker.io/moonlyss/geos-ui-frontend:latest
-    ports:
-      - "7000:3000"
-    depends_on:
-      - backend
-        # condition: service_healthy
-    environment:
-      APP_ENV: prod
-      APP_DEBUG: false
-      AUTH_SECRET: ${FRONT_AUTH_SECRET}
-      PUBLIC_BACKEND_ADDRESS: ${PUBLIC_BACKEND_ADDRESS}
+
   
   # elasticsearch:
   #   image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
