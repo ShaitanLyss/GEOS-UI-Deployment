@@ -23,21 +23,21 @@ def main():
     args = parser.parse_args()
     command = args.command
     if command == "update":
-        print("Updating geos-ui-compose image...")
+        print("Updating GraphGEOS...")
         compose("pull")
         compose("down")
         compose("up -d")
         print("Done.")
     elif command == "up":
-        print("Starting geos-ui-compose container...")
+        print("Starting GraphGEOS...")
         compose("up -d")
         print("Done.")
     elif command == "down":
-        print("Stopping geos-ui-compose container...")
+        print("Stopping GraphGEOS...")
         compose("down")
         print("Done.")
     elif command == "logs":
-        print("Showing geos-ui-compose logs...")
+        print("Showing GraphGEOS logs...")
         compose("logs -f")
         print("Done.")
 
