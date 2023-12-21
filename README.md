@@ -50,6 +50,8 @@ python3 geos-ui.py down
 
 ### Updating the deployment system
 
+Updating can be done even while the deployment system is running, though at one point it might recreate the containers.
+
 To update the deployment system, run the following command:
 
 ```bash
