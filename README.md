@@ -58,3 +58,11 @@ To update the deployment system, run the following command:
 python3 geos-ui.py update
 ```
 
+### Displaying all the logs
+
+To display all the logs of the deployment system, run the following command:
+
+```bash
+python3 geos-ui.py logs
+```
+
