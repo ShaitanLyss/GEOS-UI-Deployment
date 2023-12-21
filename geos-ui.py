@@ -24,6 +24,7 @@ def main():
     command = args.command
     if command == "update":
         print("Updating GraphGEOS...")
+        os.system("git pull")
         compose("pull")
         compose("down")
         compose("up -d")
@@ -43,4 +44,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        pass
