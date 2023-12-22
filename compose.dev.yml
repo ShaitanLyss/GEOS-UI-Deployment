@@ -16,6 +16,7 @@ services:
       secrets:
         - certificate
       target: development
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     security_opt:
       - seccomp:unconfined
     working_dir: /app
@@ -39,49 +40,49 @@ services:
       GEOS_UI_ENABLE_AUTHENTICATION: False
       GEOS_UI_HTTPS_CAFILE: /run/secrets/certificate
 
-  frontend:
-    ports:
-      - "5173:5173"
-    working_dir: /app
-    secrets:
-      - certificate
-    image: docker.io/moonlyss/geos-ui-frontend:latest
-    build:
-      secrets:
-        - certificate
-      context: frontend
-      target: dev
-    command: ["pnpm", "dev", "--host"]
-    volumes:
-      - ./frontend/:/app/
-      - /app/node_modules
-    depends_on:
-      - backend
-        # condition: service_healthy
-    environment:
-      APP_ENV: dev
-      APP_DEBUG: true
-      ENABLE_AUTH: false
-      PUBLIC_ENABLE_AUTH: false
-      AUTH_SECRET: ${FRONT_AUTH_SECRET:-CHANGE_FRONTEND_SECRET}
-      PUBLIC_BACKEND_ADDRESS: http://localhost:8000
+  # frontend:
+  #   ports:
+  #     - "5173:5173"
+  #   working_dir: /app
+  #   secrets:
+  #     - certificate
+  #   image: docker.io/moonlyss/geos-ui-frontend:latest
+  #   build:
+  #     secrets:
+  #       - certificate
+  #     context: frontend
+  #     target: dev
+  #   command: ["pnpm", "dev", "--host"]
+  #   volumes:
+  #     - ./frontend/:/app/
+  #     - /app/node_modules
+  #   depends_on:
+  #     - backend
+  #       # condition: service_healthy
+  #   environment:
+  #     APP_ENV: dev
+  #     APP_DEBUG: true
+  #     ENABLE_AUTH: false
+  #     PUBLIC_ENABLE_AUTH: false
+  #     AUTH_SECRET: ${FRONT_AUTH_SECRET:-CHANGE_FRONTEND_SECRET}
+  #     PUBLIC_BACKEND_ADDRESS: http://localhost:8000
 
   
-  postgraphile:
-    image: graphile/postgraphile
-    depends_on:
-      - postgres
-    ports:
-      - "5000:5000"
-    command:
-      [
-          "--connection",
-          "postgres://${DB_USER}:${DB_PASSWD}@postgres:5432/geos-ui-dev",
-          "--port",
-          "5000",
-          "--schema",
-          "public",
-      ]
+  # postgraphile:
+  #   image: graphile/postgraphile
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - "5000:5000"
+  #   command:
+  #     [
+  #         "--connection",
+  #         "postgres://${DB_USER}:${DB_PASSWD}@postgres:5432/geos-ui-dev",
+  #         "--port",
+  #         "5000",
+  #         "--schema",
+  #         "public",
+  #     ]
 
   # pgadmin:
   #   image: docker.io/dpage/pgadmin4:latest
