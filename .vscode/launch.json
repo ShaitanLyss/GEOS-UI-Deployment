@@ -11,7 +11,7 @@
             "purpose": ["debug-in-terminal"],
             "cwd": "${workspaceFolder}\\backend\\src",
             "module": "app.main",
-            "justMyCode": true
+            "justMyCode": false
         },
         {
             "name": "Launch Backend",
