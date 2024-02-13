@@ -86,7 +86,7 @@ services:
     # security_opt:
     #   - seccomp:unconfined
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_2:/var/lib/postgresql/data
 
 
   
@@ -96,4 +96,4 @@ services:
   #     - "discovery.type=single-node"
 
 volumes:
-  postgres_data:
+  postgres_data_2:
