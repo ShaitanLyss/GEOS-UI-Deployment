@@ -4,8 +4,26 @@ secrets:
   certificate:
     file: ${CA}
 services:
+  elasticsearch:
+    restart: always
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enrollment.enabled=true
+      - ELASTIC_PASSWORD=${ES_PASSWORD}
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -u elastic:${ES_PASSWORD} -k http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 20
   frontend:
     image: docker.io/moonlyss/geos-ui-frontend:latest
+    restart: always
     build:
       context: frontend
     ports:
@@ -21,8 +39,12 @@ services:
       PUBLIC_BACKEND_ADDRESS: ${PUBLIC_BACKEND_ADDRESS}
 
   backend:
+    restart: always
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
     image: docker.io/moonlyss/geos-ui-backend:latest
     secrets:
       - certificate
@@ -32,7 +54,6 @@ services:
       - seccomp:unconfined
     ports:
       - "8001:8000"
-    restart: on-failure
     environment:
       GEOS_UI_DB_USER: ${DB_USER}
       GEOS_UI_DB_PASSWD: ${DB_PASSWD}
@@ -45,6 +66,7 @@ services:
       GEOS_UI_OAUTH2_REFRESH_TOKEN_GENERATOR: True
       GEOS_UI_ENABLE_AUTHENTICATION: False
       GEOS_UI_HTTPS_CAFILE: /run/secrets/certificate
+      ES_PASSWORD: ${ES_PASSWORD}
     
   
   # postgraphile:
@@ -77,23 +99,14 @@ services:
       POSTGRES_DB: geos-ui
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWD}
-    # healthcheck:
-    #   test: ["CMD-SHELL", "pg_isready", "-d", "geos-ui-dev"]
-      # interval: 30s
-      # timeout: 60s
-      # retries: 5
-      # start_period: 5s  
-    # security_opt:
-    #   - seccomp:unconfined
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "geos-ui-dev"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 5s
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-
-  
-  # elasticsearch:
-  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
-  #   environment:
-  #     - "discovery.type=single-node"
+      - postgres_data_2:/var/lib/postgresql/data
 
 volumes:
-  postgres_data:
+  postgres_data_2:

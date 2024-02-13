@@ -10,7 +10,7 @@ services:
       - discovery.type=single-node
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - xpack.security.enrollment.enabled=true
-      # - ELASTIC_PASSWORD=${ES_PASSWORD}
+      - ELASTIC_PASSWORD=${ES_PASSWORD}
     ports:
       - "9200:9200"
     volumes:
@@ -63,10 +63,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      test_postgres:
-        condition: service_started
       elasticsearch:
         condition: service_healthy
+      test_postgres:
+        condition: service_started
       
       # - vault
       # - consul
