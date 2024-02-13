@@ -100,7 +100,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWD}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "geos-ui-dev"]
+      test: ["CMD-SHELL", "pg_isready -d geos-ui-dev"]
       interval: 30s
       timeout: 60s
       retries: 5
