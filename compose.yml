@@ -109,4 +109,5 @@ services:
       - postgres_data_2:/var/lib/postgresql/data
 
 volumes:
+  elasticsearch_data:
   postgres_data_2:
