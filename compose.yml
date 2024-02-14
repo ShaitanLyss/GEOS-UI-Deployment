@@ -55,6 +55,7 @@ services:
     ports:
       - "8001:8000"
     environment:
+      PYGEOS: ${PYGEOS}
       GEOS_UI_DB_USER: ${DB_USER}
       GEOS_UI_DB_PASSWD: ${DB_PASSWD}
       GEOS_UI_DB_NAME: geos-ui
