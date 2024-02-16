@@ -4,23 +4,23 @@ secrets:
   certificate:
     file: ${CA}
 services:
-  caddy:
-    secrets:
-      - certificate
-    userns_mode: "keep-id"
-    user: "root"
-    security_opt:
-      - seccomp:unconfined
-    restart: always
-    image: docker.io/caddy:latest
-    command: sh -c "cat /run/secrets/certificate >> /etc/ssl/certs/ca-certificates.crt &&  caddy reverse-proxy --from intlog02:7001 --to frontend:7000"
+  # caddy:
+  #   secrets:
+  #     - certificate
+  #   userns_mode: "keep-id"
+  #   user: "root"
+  #   security_opt:
+  #     - seccomp:unconfined
+  #   restart: always
+  #   image: docker.io/caddy:latest
+  #   command: sh -c "cat /run/secrets/certificate >> /etc/ssl/certs/ca-certificates.crt &&  caddy reverse-proxy --from intlog02:7001 --to frontend:7000"
 
-    volumes:
-      - caddy_data:/data
-    expose:
-      - "7001"
-    ports:
-      - "7001:7001"
+  #   volumes:
+  #     - caddy_data:/data
+  #   expose:
+  #     - "7001"
+  #   ports:
+  #     - "7001:7001"
   elasticsearch:
     restart: always
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
@@ -39,6 +39,7 @@ services:
    #  timeout: 5s
    #  retries: 20
   frontend:
+    container_name: frontend-2
     userns_mode: "keep-id"
     image: docker.io/moonlyss/geos-ui-frontend:latest
     restart: always
