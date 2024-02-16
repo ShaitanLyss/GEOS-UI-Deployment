@@ -4,23 +4,6 @@ secrets:
   certificate:
     file: ${CA}
 services:
-  # caddy:
-  #   secrets:
-  #     - certificate
-  #   userns_mode: "keep-id"
-  #   user: "root"
-  #   security_opt:
-  #     - seccomp:unconfined
-  #   restart: always
-  #   image: docker.io/caddy:latest
-  #   command: sh -c "cat /run/secrets/certificate >> /etc/ssl/certs/ca-certificates.crt &&  caddy reverse-proxy --from intlog02:7001 --to frontend:7000"
-
-  #   volumes:
-  #     - caddy_data:/data
-  #   expose:
-  #     - "7001"
-  #   ports:
-  #     - "7001:7001"
   elasticsearch:
     restart: always
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
@@ -33,16 +16,15 @@ services:
       - "9200:9200"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
-   #healthcheck:
-   #  test: ["CMD-SHELL", "curl -u elastic:${ES_PASSWORD} -k http://localhost:9200/_cluster/health || exit 1"]
-   #  interval: 30s
-   #  timeout: 5s
-   #  retries: 20
+    healthcheck:
+      test: ["CMD-SHELL", "curl -u elastic:${ES_PASSWORD} -k http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 20
   frontend:
     container_name: frontend-2
     userns_mode: "keep-id"
     image: docker.io/moonlyss/geos-ui-frontend:latest
-    restart: always
     build:
       context: frontend
     ports:
@@ -58,14 +40,14 @@ services:
       PUBLIC_BACKEND_ADDRESS: ${PUBLIC_BACKEND_ADDRESS}
 
   backend:
-    restart: always
+    restart: on-failure
     userns_mode: "keep-id"
     user: "root"
     depends_on:
       postgres:
         condition: service_healthy
       elasticsearch:
-        condition: service_started
+        condition: service_healthy
     image: docker.io/moonlyss/geos-ui-backend:latest
     volumes:
       - backend_data:/data
@@ -91,6 +73,21 @@ services:
       GEOS_UI_ENABLE_AUTHENTICATION: False
       GEOS_UI_HTTPS_CAFILE: /run/secrets/certificate
       ES_PASSWORD: ${ES_PASSWORD}
+
+  postgres:
+    image: docker.io/library/postgres:16
+    environment:
+      POSTGRES_DB: geos-ui
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d geos-ui-dev"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - postgres_data_2:/var/lib/postgresql/data
     
   
   # postgraphile:
@@ -116,21 +113,24 @@ services:
   #   environment:
   #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
   #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-  
-  postgres:
-    image: docker.io/library/postgres:16
-    environment:
-      POSTGRES_DB: geos-ui
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWD}
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d geos-ui-dev"]
-      interval: 30s
-      timeout: 60s
-      retries: 5
-      start_period: 5s
-    volumes:
-      - postgres_data_2:/var/lib/postgresql/data
+
+    # caddy:
+  #   secrets:
+  #     - certificate
+  #   userns_mode: "keep-id"
+  #   user: "root"
+  #   security_opt:
+  #     - seccomp:unconfined
+  #   restart: always
+  #   image: docker.io/caddy:latest
+  #   command: sh -c "cat /run/secrets/certificate >> /etc/ssl/certs/ca-certificates.crt &&  caddy reverse-proxy --from intlog02:7001 --to frontend:7000"
+
+  #   volumes:
+  #     - caddy_data:/data
+  #   expose:
+  #     - "7001"
+  #   ports:
+  #     - "7001:7001"
 
 volumes:
   elasticsearch_data:
