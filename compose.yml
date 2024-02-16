@@ -4,6 +4,13 @@ secrets:
   certificate:
     file: ${CA}
 services:
+  caddy:
+    image: docker.io/caddy:latest
+    command: ["caddy", "reverse-proxy", "--from", "intlog02:7001", "--to", "frontend:7000"]
+    expose:
+      - "7001"
+    ports:
+      - "7001:7001"
   elasticsearch:
     restart: always
     image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
