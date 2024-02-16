@@ -59,7 +59,6 @@ services:
   #     - "8500:8500"
 
   backend:
-    restart: on-failure
     depends_on:
       postgres:
         condition: service_healthy
