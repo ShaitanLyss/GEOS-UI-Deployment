@@ -7,6 +7,8 @@ services:
   caddy:
     image: docker.io/caddy:latest
     command: ["caddy", "reverse-proxy", "--from", "intlog02:7001", "--to", "frontend:7000"]
+    volumes:
+      - caddy_data:/data
     expose:
       - "7001"
     ports:
@@ -120,3 +122,4 @@ services:
 volumes:
   elasticsearch_data:
   postgres_data_2:
+  caddy_data:
