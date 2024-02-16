@@ -14,6 +14,7 @@ services:
     restart: always
     image: docker.io/caddy:latest
     command: sh -c "cat /run/secrets/certificate >> /etc/ssl/certs/ca-certificates.crt &&  caddy reverse-proxy --from intlog02:7001 --to frontend:7000"
+
     volumes:
       - caddy_data:/data
     expose:
@@ -63,6 +64,8 @@ services:
       elasticsearch:
         condition: service_started
     image: docker.io/moonlyss/geos-ui-backend:latest
+    volumes:
+      - backend_data:/data
     secrets:
       - certificate
     build:
@@ -130,3 +133,4 @@ volumes:
   elasticsearch_data:
   postgres_data_2:
   caddy_data:
+  backend_data:

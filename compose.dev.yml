@@ -87,6 +87,7 @@ services:
       - "8000:8000"
     environment:
       CURL_CA_BUNDLE: /run/secrets/certificate
+      GEOS_UI_DEV: True
       GEOS_UI_DB_USER: ${DB_USER}
       GEOS_UI_DB_PASSWD: ${DB_PASSWD}
       GEOS_UI_DB_NAME: geos-ui-dev
