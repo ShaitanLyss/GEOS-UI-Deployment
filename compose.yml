@@ -1,5 +1,5 @@
 version: '3.8'
-# name: geos-ui
+name: geos-ui
 secrets:
   certificate:
     file: ${CA}
@@ -16,11 +16,11 @@ services:
       - "9200:9200"
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
-    # healthcheck:
-    #   test: ["CMD-SHELL", "curl -u elastic:${ES_PASSWORD} -k http://localhost:9200/_cluster/health || exit 1"]
-    #   interval: 30s
-    #   timeout: 5s
-    #   retries: 20
+    healthcheck:
+      test: ["CMD-SHELL", "curl -u elastic:${ES_PASSWORD} -k http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 20
   frontend:
     container_name: frontend-2
     userns_mode: "keep-id"
@@ -34,7 +34,7 @@ services:
         # condition: service_healthy
     environment:
       APP_ENV: prod
-      APP_DEBUG: 'false'
+      APP_DEBUG: false
       AUTH_SECRET: ${FRONT_AUTH_SECRET}
       BACKEND_ADDRESS: http://backend:8000
       PUBLIC_BACKEND_ADDRESS: ${PUBLIC_BACKEND_ADDRESS}
@@ -42,11 +42,12 @@ services:
   backend:
     restart: on-failure
     userns_mode: "keep-id"
+    user: "root"
     depends_on:
-      - postgres
-        # condition: service_started
-      - elasticsearch
-        # condition: service_started
+      postgres:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
     image: docker.io/moonlyss/geos-ui-backend:latest
     volumes:
       - backend_data:/data
@@ -68,8 +69,8 @@ services:
       GEOS_UI_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID}
       GEOS_UI_AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET}
       GEOS_UI_APP_SECRET: ${BACKEND_APP_SECRET}
-      GEOS_UI_OAUTH2_REFRESH_TOKEN_GENERATOR: "True"
-      GEOS_UI_ENABLE_AUTHENTICATION: 'False'
+      GEOS_UI_OAUTH2_REFRESH_TOKEN_GENERATOR: True
+      GEOS_UI_ENABLE_AUTHENTICATION: False
       GEOS_UI_HTTPS_CAFILE: /run/secrets/certificate
       ES_PASSWORD: ${ES_PASSWORD}
 
@@ -80,16 +81,14 @@ services:
       POSTGRES_DB: geos-ui
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWD}
-    ports:
-      - "5432:5432"
-    # healthcheck:
-    #   test: ["CMD-SHELL", "pg_isready -d geos-ui-dev"]
-    #   interval: 30s
-    #   timeout: 60s
-    #   retries: 5
-    #   start_period: 5s
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d geos-ui-dev"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 5s
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_2:/var/lib/postgresql/data
     
   
   # postgraphile:
@@ -136,6 +135,6 @@ services:
 
 volumes:
   elasticsearch_data:
-  postgres_data:
+  postgres_data_2:
   caddy_data:
   backend_data:

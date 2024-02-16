@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    graph-geos.service: frontend
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      graph-geos.service: frontend
+  template:
+    metadata:
+      labels:
+        graph-geos.service: frontend
+    spec:
+      containers:
+        - env:
+            - name: APP_DEBUG
+              value: "false"
+            - name: APP_ENV
+              value: prod
+            - name: BACKEND_ADDRESS
+              value: http://backend:8000
+            - name: PUBLIC_BACKEND_ADDRESS
+              value: ${PUBLIC_BACKEND_ADDRESS}
+          image: docker.io/moonlyss/geos-ui-frontend:latest
+          name: frontend
+          ports:
+            - containerPort: 3000
+          resources: {}

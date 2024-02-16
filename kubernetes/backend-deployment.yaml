@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Deployment
+metadata:
+  labels:
+    graph-geos.service: backend
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      graph-geos.service: backend
+  template:
+      metadata:
+      labels:
+        app: backend
+      spec:
+        containers:
+          - name: backend
+            image: docker.io/moonlyss/geos-ui-backend:latest
+            ports:
+              - containerPort: 8000
+            volumeMounts:
+              - mountPath: /run/secrets/certificate
+                name: certificate
+              - mountPath: /data
+                name: backend-data
+            env:
+              - name: ES_PASSWORD
+                value: ${ES_PASSWORD}
+              - name: GEOS_UI_AUTH0_CLIENT_ID
+                value: ${AUTH0_CLIENT_ID}
+              - name: GEOS_UI_AUTH0_CLIENT_SECRET
+                value: ${AUTH0_CLIENT_SECRET}
+              - name: GEOS_UI_AUTH0_DOMAIN
+                value: ${AUTH0_DOMAIN}
+              - name: GEOS_UI_DB_HOST
+                value: postgres
+              - name: GEOS_UI_DB_NAME
+                value: geos-ui
+              - name: GEOS_UI_DB_PASSWD
+                value: ${DB_PASSWD}
+              - name: GEOS_UI_DB_USER
+                value: ${DB_USER}
+              - name: GEOS_UI_ENABLE_AUTHENTICATION
+                value: "False"
+              - name: GEOS_UI_HTTPS_CAFILE
+                value: /run/secrets/certificate
+              - name: GEOS_UI_OAUTH2_REFRESH_TOKEN_GENERATOR
+                value: "True"
+              - name: PYGEOS
+            # securityContext:
+            #   runAsUser: 0 # root user
+        volumes:
+          - name: certificate
+            secret:
+              items:
+                - key: certificate
+                  path: certificate
+              secretName: certificate
+          - name: backend-data
+            persistentVolumeClaim:
+              claimName: backend-data

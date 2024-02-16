@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      graph-geos: elasticsearch
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        graph-geos: elasticsearch
+    spec:
+      containers:
+        - env:
+            - name: ELASTIC_PASSWORD
+              value: ${ES_PASSWORD}
+            - name: ES_JAVA_OPTS
+              value: -Xms512m -Xmx512m
+            - name: discovery.type
+              value: single-node
+            - name: xpack.security.enrollment.enabled
+              value: "true"
+          image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
+          name: elasticsearch
+          ports:
+            - containerPort: 9200
+          resources: {}
+          volumeMounts:
+            - mountPath: /usr/share/elasticsearch/data
+              name: elasticsearch-data
+      volumes:
+        - name: elasticsearch-data
+          persistentVolumeClaim:
+            claimName: elasticsearch-data
+status: {}

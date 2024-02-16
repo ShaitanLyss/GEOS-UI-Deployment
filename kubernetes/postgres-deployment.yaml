@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    graph-geos.service: postgres
+  name: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      graph-geos.service: postgres
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        graph-geos.service: postgres
+    spec:
+      containers:
+        - env:
+            - name: POSTGRES_DB
+              value: geos-ui
+            - name: POSTGRES_PASSWORD
+              value: ${DB_PASSWD}
+            - name: POSTGRES_USER
+              value: ${DB_USER}
+          image: docker.io/library/postgres:16
+          name: postgres
+          ports:
+            - containerPort: 5432
+          resources: {}
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-data
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-data
+status: {}
