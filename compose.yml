@@ -8,6 +8,7 @@ services:
     secrets:
       - certificate
     userns_mode: "keep-id"
+    user: "root"
     restart: always
     image: docker.io/caddy:latest
     command: sh -c "cat /run/secrets/certificate >> /etc/ssl/certs/ca-certificates.crt &&  caddy reverse-proxy --from intlog02:7001 --to frontend:7000"
