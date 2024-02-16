@@ -10,7 +10,7 @@ services:
     userns_mode: "keep-id"
     restart: always
     image: docker.io/caddy:latest
-    command: cat /run/secrets/certificate >> /etc/ssl/certs/ca-certificates.crt &&  caddy reverse-proxy --from intlog02:7001 --to frontend:7000
+    command: sh -c "cat /run/secrets/certificate >> /etc/ssl/certs/ca-certificates.crt &&  caddy reverse-proxy --from intlog02:7001 --to frontend:7000"
     volumes:
       - caddy_data:/data
     expose:
