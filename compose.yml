@@ -58,6 +58,8 @@ services:
 
   backend:
     restart: always
+    userns_mode: "keep-id"
+    user: "root"
     depends_on:
       postgres:
         condition: service_healthy
