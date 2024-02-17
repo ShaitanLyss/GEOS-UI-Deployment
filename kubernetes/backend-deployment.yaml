@@ -51,12 +51,12 @@ spec:
             # securityContext:
             #   runAsUser: 0 # root user
         volumes:
-          - name: certificate
-            secret:
-              items:
-                - key: certificate
-                  path: certificate
-              secretName: certificate
+          # - name: certificate
+          #   secret:
+          #     items:
+          #       - key: certificate
+          #         path: certificate
+          #     secretName: certificate
           - name: backend-data
             persistentVolumeClaim:
               claimName: backend-data
