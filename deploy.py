@@ -37,7 +37,7 @@ def envsubst_yaml(yaml_str: str) -> str:
 
     # Replace all environment variables with their values
     for var in env_vars:
-        if var == "CA_CONTENT":
+        if False and var == "CA_CONTENT":
             with open("/etc/ssl/certs/ca-bundle.crt") as f:
                 value = f.read()
         else:
