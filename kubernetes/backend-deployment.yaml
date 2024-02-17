@@ -20,8 +20,9 @@ spec:
             ports:
               - containerPort: 8000
             volumeMounts:
-              # - mountPath: /run/secrets/certificate
-              #   name: certificate
+              - name: "certificate"
+                mountPath: "/etc/ssl/certs/ca-bundle.crt"
+                subPath: "ca-bundle.crt"
               - mountPath: /data
                 name: backend-data
             env:
@@ -44,21 +45,25 @@ spec:
               - name: GEOS_UI_ENABLE_AUTHENTICATION
                 value: "False"
               - name: GEOS_UI_HTTPS_CAFILE
-                value: /data/certificate
-              - name: GEOS_UI_HTTPS_CA
-                value: ${CA_CONTENT}
+                value: /etc/ssl/certs/ca-bundle.crt
+              # - name: GEOS_UI_HTTPS_CA
+              #   value: ${CA_CONTENT}
               - name: GEOS_UI_OAUTH2_REFRESH_TOKEN_GENERATOR
                 value: "True"
               - name: PYGEOS
             # securityContext:
             #   runAsUser: 0 # root user
+        
         volumes:
-          # - name: certificate
-          #   secret:
-          #     items:
-          #       - key: certificate
-          #         path: certificate
-          #     secretName: certificate
+          - name: "certificate"
+            hostPath:
+              path: "/etc/ssl/certs/ca-bundle.crt"
+          - name: certificate
+            secret:
+              items:
+                - key: certificate
+                  path: certificate
+              secretName: certificate
           - name: backend-data
             persistentVolumeClaim:
               claimName: backend-data
