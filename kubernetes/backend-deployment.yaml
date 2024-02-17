@@ -18,8 +18,8 @@ spec:
         containers:
           - name: backend
             image: docker.io/moonlyss/geos-ui-backend:latest
-            ports:
-              - containerPort: 8000
+            # ports:
+            #   - containerPort: 8000
             volumeMounts:
               - name: "certificate"
                 mountPath: "/etc/ssl/certs/ca-bundle.crt"
