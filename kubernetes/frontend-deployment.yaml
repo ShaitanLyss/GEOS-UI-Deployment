@@ -14,14 +14,17 @@ spec:
       labels:
         graph-geos.service: frontend
     spec:
+      
       containers:
+      
         - env:
             - name: APP_DEBUG
               value: "false"
             - name: APP_ENV
               value: prod
             - name: BACKEND_ADDRESS
-              value: http://host.containers.internal:8000
+              value: http://backend:8000
+              # value: http://host.containers.internal:8000
             - name: PUBLIC_BACKEND_ADDRESS
               value: ${PUBLIC_BACKEND_ADDRESS}
           image: docker.io/moonlyss/geos-ui-frontend:latest
@@ -29,3 +32,4 @@ spec:
           ports:
             - containerPort: 3000
           resources: {}
+        

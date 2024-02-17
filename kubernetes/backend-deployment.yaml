@@ -14,12 +14,15 @@ spec:
       labels:
         app: backend
       spec:
-        hostNetwork: true
+        dnsConfig:
+          nameservers:
+          - 10.96.1.35
+        # hostNetwork: true
         containers:
           - name: backend
             image: docker.io/moonlyss/geos-ui-backend:latest
-            # ports:
-            #   - containerPort: 8000
+            ports:
+              - containerPort: 8000
             volumeMounts:
               - name: "certificate"
                 mountPath: "/etc/ssl/certs/ca-bundle.crt"
