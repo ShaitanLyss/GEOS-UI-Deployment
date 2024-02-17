@@ -43,8 +43,12 @@ def envsubst_yaml(yaml_str: str) -> str:
     return yaml_str
 
 
-def play_kube(yaml_str: str, down: bool=False) -> None:
-    subprocess.run(f"podman play kube --replace {"--down" if down else ""} -", shell=True, input=yaml_str.encode())
+def play_kube(yaml_str: str, down: bool = False) -> None:
+    subprocess.run(
+        "podman play kube --replace {} -".format("--down" if down else ""),
+        shell=True,
+        input=yaml_str.encode(),
+    )
 
 
 def main():
@@ -59,7 +63,7 @@ def main():
     yaml_str = get_pre_envsubst_yaml()
     yaml_str = envsubst_yaml(yaml_str)
     print(yaml_str)
-    
+
     if args.up:
         print("Deploying application")
         play_kube(yaml_str)
