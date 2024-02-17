@@ -21,7 +21,7 @@ spec:
               - containerPort: 8000
             volumeMounts:
               - name: "certificate"
-                mountPath: "/etc/ssl/certs"
+                mountPath: "/data"
                 subPath: "ca-bundle.crt"
               - mountPath: /data
                 name: backend-data
