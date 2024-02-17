@@ -30,6 +30,9 @@ spec:
           volumeMounts:
             - mountPath: /usr/share/elasticsearch/data
               name: elasticsearch-data
+          securityContext:
+            runAsGroup: 0
+            runAsUser: 0
       volumes:
         - name: elasticsearch-data
           persistentVolumeClaim:
