@@ -57,7 +57,7 @@ spec:
         volumes:
           - name: "certificate"
             hostPath:
-              path: "/etc/ssl/certs"
+              path: "/etc/ssl/certs/ca-bundle.crt"
           # - name: certificate
           #   secret:
           #     items:
