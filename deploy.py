@@ -60,7 +60,7 @@ def main():
 
     
     parser.add_argument(
-        "command", help="Command to run", choices=["up", "down"]
+        "command", help="Command to run", choices=["up", "down"], default="up"
     )
     yaml_str = get_pre_envsubst_yaml()
     yaml_str = envsubst_yaml(yaml_str)
