@@ -37,7 +37,11 @@ def envsubst_yaml(yaml_str: str) -> str:
 
     # Replace all environment variables with their values
     for var in env_vars:
-        value = os.getenv(var, "")
+        if var == "CA_CONTENT":
+            with open("/etc/ssl/certs/ca-bundle.crt") as f:
+                value = f.read()
+        else:
+            value = os.getenv(var, "")
         yaml_str = yaml_str.replace(f"${{{var}}}", f'"{value}"')
 
     return yaml_str
