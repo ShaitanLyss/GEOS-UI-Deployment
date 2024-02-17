@@ -48,7 +48,7 @@ def play_kube(yaml_str: str) -> None:
 def main():
     yaml_str = get_pre_envsubst_yaml()
     yaml_str = envsubst_yaml(yaml_str)
-    # print(yaml_str)
+    print(yaml_str)
     play_kube(yaml_str)
     
 
