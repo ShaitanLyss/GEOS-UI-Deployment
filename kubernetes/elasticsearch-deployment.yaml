@@ -31,8 +31,8 @@ spec:
             - mountPath: /usr/share/elasticsearch/data
               name: elasticsearch-data
           securityContext:
-            runAsGroup: 1100389
-            runAsUser: 5000
+            runAsGroup: 5000
+            runAsUser: 1100389
       volumes:
         - name: elasticsearch-data
           persistentVolumeClaim:
