@@ -32,7 +32,7 @@ spec:
               name: elasticsearch-data
           securityContext:
             runAsGroup: 1100389
-            runAsUser: 1100389
+            runAsUser: 5000
       volumes:
         - name: elasticsearch-data
           persistentVolumeClaim:
