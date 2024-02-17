@@ -44,7 +44,7 @@ spec:
               - name: GEOS_UI_ENABLE_AUTHENTICATION
                 value: "False"
               - name: GEOS_UI_HTTPS_CAFILE
-                value: /run/secrets/certificate
+                value: /data/certificate
               - name: GEOS_UI_HTTPS_CA
                 value: ${CA_CONTENT}
               - name: GEOS_UI_OAUTH2_REFRESH_TOKEN_GENERATOR
