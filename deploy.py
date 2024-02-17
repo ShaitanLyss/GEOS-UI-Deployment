@@ -58,16 +58,20 @@ def main():
     parser.add_argument_group("up", "Deploy the application")
     parser.add_argument_group("down", "Remove the application")
 
-    args = parser.parse_args()
-
+    
+    parser.add_argument(
+        "command", help="Command to run", choices=["up", "down"]
+    )
     yaml_str = get_pre_envsubst_yaml()
     yaml_str = envsubst_yaml(yaml_str)
+    args = parser.parse_args()
     print(yaml_str)
+    command = args.command
 
-    if args.up:
+    if command == "up":
         print("Deploying application")
         play_kube(yaml_str)
-    elif args.down:
+    elif command == "down":
         print("Removing application")
         play_kube(yaml_str, down=True)
 
