@@ -25,6 +25,22 @@ spec:
               - mountPath: /data
                 name: backend-data
             env:
+              - name: http_proxy
+                value: http://cloudproxy-emea.corp.local:8080
+              - name: ftp_proxy
+                value: http://cloudproxy-emea.corp.local:8080
+              - name: HTTP_PROXY
+                value: http://cloudproxy-emea.corp.local:8080
+              - name: NO_PROXY
+                value: 127.0.0.1,localhost,172.20.0.178,main.glb.corp.local,ep.corp.local
+              - name: https_proxy
+                value: http://cloudproxy-emea.corp.local:8080
+              - name: no_proxy
+                value: 127.0.0.1,localhost,172.20.0.178,main.glb.corp.local,ep.corp.local
+              - name: HTTPS_PROXY
+                value: http://cloudproxy-emea.corp.local:8080
+              - name: FTP_PROXY
+                value: http://cloudproxy-emea.corp.local:8080
               - name: ES_PASSWORD
                 value: ${ES_PASSWORD}
               - name: GEOS_UI_AUTH0_CLIENT_ID
