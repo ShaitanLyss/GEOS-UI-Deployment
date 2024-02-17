@@ -58,12 +58,12 @@ spec:
           - name: "certificate"
             hostPath:
               path: "/etc/ssl/certs/ca-bundle.crt"
-          - name: certificate
-            secret:
-              items:
-                - key: certificate
-                  path: certificate
-              secretName: certificate
+          # - name: certificate
+          #   secret:
+          #     items:
+          #       - key: certificate
+          #         path: certificate
+          #     secretName: certificate
           - name: backend-data
             persistentVolumeClaim:
               claimName: backend-data
