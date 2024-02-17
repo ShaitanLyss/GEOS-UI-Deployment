@@ -20,8 +20,8 @@ spec:
             ports:
               - containerPort: 8000
             volumeMounts:
-              - mountPath: /run/secrets/certificate
-                name: certificate
+              # - mountPath: /run/secrets/certificate
+              #   name: certificate
               - mountPath: /data
                 name: backend-data
             env:
