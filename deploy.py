@@ -37,7 +37,7 @@ def envsubst_yaml(yaml_str: str) -> str:
     # Replace all environment variables with their values
     for var in env_vars:
         value = os.getenv(var, "")
-        yaml_str = yaml_str.replace(f"${{{var}}}", value)
+        yaml_str = yaml_str.replace(f"${{{var}}}", f'"{value}"')
     
     return yaml_str
 
