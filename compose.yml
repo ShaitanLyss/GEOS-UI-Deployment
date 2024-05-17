@@ -76,7 +76,7 @@ services:
 
   postgres:
     image: docker.io/library/postgres:16
-    userns_mode: "keep-id"
+    userns_mode: "keep-id"  
     environment:
       POSTGRES_DB: geos-ui
       POSTGRES_USER: ${DB_USER}
