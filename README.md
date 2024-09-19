@@ -66,3 +66,4 @@ To display all the logs of the deployment system, run the following command:
 python3 geos-ui.py logs
 ```
 
+docker exec geos-ui-dev-backend-1 alembic revision --autogenerate -m "Added tag table"

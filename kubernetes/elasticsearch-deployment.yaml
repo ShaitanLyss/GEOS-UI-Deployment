@@ -22,11 +22,15 @@ spec:
               value: single-node
             - name: xpack.security.enrollment.enabled
               value: "true"
+<<<<<<< HEAD
             - name: xpack.security.transport.ssl.enabled
               value: "false"
             - name: xpack.security.http.ssl.enabled
               value: "false"
           image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+=======
+          image: docker.elastic.co/elasticsearch/elasticsearch:7
+>>>>>>> 8b6542b0fdef69723867cea0c7fde46ff3a22390
           name: elasticsearch
           ports:
             - containerPort: 9200

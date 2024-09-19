@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 apiVersion: v1
 kind: Deployment
 metadata:
@@ -84,3 +85,91 @@ spec:
           - name: backend-data
             persistentVolumeClaim:
               claimName: backend-data
+=======
+apiVersion: v1
+kind: Deployment
+metadata:
+  labels:
+    graph-geos.service: backend
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      graph-geos.service: backend
+  template:
+      metadata:
+      labels:
+        app: backend
+      spec:
+        # hostNetwork: true
+        containers:
+          - name: backend
+            image: docker.io/moonlyss/geos-ui-backend:latest
+            ports:
+              - containerPort: 8000
+            volumeMounts:
+              - name: "certificate"
+                mountPath: "/etc/ssl/certs/ca-bundle.crt"
+              - mountPath: /data
+                name: backend-data
+            env:
+              - name: http_proxy
+                value: http://cloudproxy-emea.corp.local:8080
+              - name: ftp_proxy
+                value: http://cloudproxy-emea.corp.local:8080
+              - name: HTTP_PROXY
+                value: http://cloudproxy-emea.corp.local:8080
+              - name: NO_PROXY
+                value: 127.0.0.1,localhost,172.20.0.178,main.glb.corp.local,ep.corp.local
+              - name: https_proxy
+                value: http://cloudproxy-emea.corp.local:8080
+              - name: no_proxy
+                value: 127.0.0.1,localhost,172.20.0.178,main.glb.corp.local,ep.corp.local
+              - name: HTTPS_PROXY
+                value: http://cloudproxy-emea.corp.local:8080
+              - name: FTP_PROXY
+                value: http://cloudproxy-emea.corp.local:8080
+              - name: ES_PASSWORD
+                value: ${ES_PASSWORD}
+              - name: GEOS_UI_AUTH0_CLIENT_ID
+                value: ${AUTH0_CLIENT_ID}
+              - name: GEOS_UI_AUTH0_CLIENT_SECRET
+                value: ${AUTH0_CLIENT_SECRET}
+              - name: GEOS_UI_AUTH0_DOMAIN
+                value: ${AUTH0_DOMAIN}
+              - name: GEOS_UI_DB_HOST
+                value: postgres
+              - name: GEOS_UI_DB_NAME
+                value: geos-ui
+              - name: GEOS_UI_DB_PASSWD
+                value: ${DB_PASSWD}
+              - name: GEOS_UI_DB_USER
+                value: ${DB_USER}
+              - name: GEOS_UI_ENABLE_AUTHENTICATION
+                value: "False"
+              - name: GEOS_UI_HTTPS_CAFILE
+                value: /etc/ssl/certs/ca-bundle.crt
+              # - name: GEOS_UI_HTTPS_CA
+              #   value: ${CA_CONTENT}
+              - name: GEOS_UI_OAUTH2_REFRESH_TOKEN_GENERATOR
+                value: "True"
+              - name: PYGEOS
+            # securityContext:
+            #   runAsUser: 0 # root user
+        
+        volumes:
+          - name: "certificate"
+            hostPath:
+              path: "/etc/ssl/certs/ca-bundle.crt"
+              type: File
+          # - name: certificate
+          #   secret:
+          #     items:
+          #       - key: certificate
+          #         path: certificate
+          #     secretName: certificate
+          - name: backend-data
+            persistentVolumeClaim:
+              claimName: backend-data
+>>>>>>> 8b6542b0fdef69723867cea0c7fde46ff3a22390
