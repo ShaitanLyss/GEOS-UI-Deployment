@@ -22,7 +22,11 @@ spec:
               value: single-node
             - name: xpack.security.enrollment.enabled
               value: "true"
-          image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
+            - name: xpack.security.transport.ssl.enabled
+              value: "false"
+            - name: xpack.security.http.ssl.enabled
+              value: "false"
+          image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
           name: elasticsearch
           ports:
             - containerPort: 9200
@@ -31,8 +35,8 @@ spec:
             - mountPath: /usr/share/elasticsearch/data
               name: elasticsearch-data
           securityContext:
-            runAsGroup: 5000
-            runAsUser: 1100389
+              runAsGroup: 5000
+              runAsUser: 1100389
       volumes:
         - name: elasticsearch-data
           persistentVolumeClaim:

@@ -24,7 +24,7 @@ spec:
               value: ${DB_PASSWD}
             - name: POSTGRES_USER
               value: ${DB_USER}
-          image: docker.io/library/postgres:16
+          image: docker.io/library/postgres:16.2
           name: postgres
           ports:
             - containerPort: 5432

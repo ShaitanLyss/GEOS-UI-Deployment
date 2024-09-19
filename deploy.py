@@ -71,13 +71,32 @@ def main():
     args = parser.parse_args()
     print(yaml_str)
     command = args.command
-
+    
+    subprocess.run("podman unshare chown -R 0:0 /var/tmp/j1100389/share/containers-4 /run/user/1100389/containers-4".split())
     if command == "up":
         print("Deploying application")
         play_kube(yaml_str)
     elif command == "down":
         print("Removing application")
         play_kube(yaml_str, down=True)
+        def port_pids(port) -> str:
+            return f"$(lsof -i :{port} -t)"
+        ports_to_kill = list(map(str, [8000, 5432, 3000, 9200]))
+        print(f"Killing processes bound to ports {' '.join(ports_to_kill)}...")
+        pids_to_kill_getter = " ".join(map(port_pids, ports_to_kill))
+        pids_to_kill = (
+            subprocess.check_output(f"echo {pids_to_kill_getter}", shell=True)
+            .decode("utf-8")
+            .strip()
+        )
+        if pids_to_kill:
+            print("Following processes will be killed :", pids_to_kill)
+            subprocess.run(["ps", "-o", "user,pid,cmd", "p", pids_to_kill])
+            if not input("Continue (y/n)").lower().startswith("y"):
+                print("Cancelling.")
+                exit()
+            subprocess.run(["kill", *pids_to_kill.split()])
+    subprocess.run("podman unshare chown -R 0:0 /var/tmp/j1100389/share/containers-4 /run/user/1100389/containers-4".split())
 
 
 if __name__ == "__main__":

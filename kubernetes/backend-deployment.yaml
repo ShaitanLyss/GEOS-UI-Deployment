@@ -20,11 +20,11 @@ spec:
             image: docker.io/moonlyss/geos-ui-backend:latest
             ports:
               - containerPort: 8000
-            volumeMounts:
-              - name: "certificate"
-                mountPath: "/etc/ssl/certs/ca-bundle.crt"
-              - mountPath: /data
-                name: backend-data
+            # volumeMounts:
+            #   - name: "certificate"
+            #     mountPath: "/etc/ssl/certs/ca-bundle.crt"
+            #   - mountPath: /data
+            #     name: backend-data
             env:
               - name: http_proxy
                 value: http://cloudproxy-emea.corp.local:8080
